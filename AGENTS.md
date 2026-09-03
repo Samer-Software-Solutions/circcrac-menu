@@ -316,6 +316,16 @@ Before considering an implementation task complete:
 
 Do not leave known errors behind.
 
+## SUPABASE MCP
+
+MCP is available and you can use it to interact with supabase
+
+## Subagents
+
+You as gpt5.6 sol will be overlooking subagents and thier tasks and verifing thier work
+
+For each stage of development use a new subagent gpt5.6 terra for code implemntation
+
 ---
 
 ## General Engineering Principle

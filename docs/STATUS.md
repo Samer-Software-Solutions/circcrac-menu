@@ -64,6 +64,27 @@ Status: complete and committed in `d682d1`.
 - Responsive and RTL behavior was checked at mobile and desktop sizes in both
   locales, including long text and missing images.
 
+### Stage 3B — Admin authentication and CMS shell
+
+Status: code complete; hosted authentication readiness remains outstanding.
+
+- Added `/admin/login` email/password sign-in using React Hook Form and a
+  shared Zod schema, with independent server-side validation and accessible
+  field and credential errors.
+- Added logout, including a fresh server-side administrator check before the
+  local Supabase session is cleared, on both desktop and mobile CMS shells.
+- Composed Supabase session refresh into the single `src/proxy.ts` with the
+  existing locale behavior. Refreshed request cookies and the SSR library's
+  required no-cache response headers are applied to normal, i18n, and redirect
+  responses. Proxy uses `getClaims` only for optimistic `/admin` redirects.
+- Added a server-only authorization DAL that uses `getUser` for fresh
+  server-confirmed authorization in the protected admin layout and protected
+  actions. Future protected data access and actions must use `requireAdmin`.
+- Added a responsive CMS shell, navigation, overview, and protected
+  intentionally scoped placeholder screens for later management stages.
+- No signup, roles, memberships, service-role client, tenant concepts, or
+  database changes were introduced.
+
 ## Architecture decisions already made
 
 - The permanent QR URL is `/`; public content uses explicit locale URLs.
@@ -79,23 +100,17 @@ Status: complete and committed in `d682d1`.
 - No restaurant, tenant, organization, membership, billing, ordering, cart, or
   payment concepts should be introduced.
 
+## Remaining work
+
+### Hosted authentication readiness
+
+- Hosted prerequisite: Supabase Auth currently has public signup enabled
+  (`disable_signup = false`) and zero administrators. Before the CMS can be
+  used, disable public signup and manually create an administrator in Supabase
+  Auth. This stage intentionally did not mutate hosted Auth or create
+  credentials.
+
 ## Remaining stages
-
-### Stage 3B — Admin authentication and CMS shell (next)
-
-- Add `/admin/login`, email/password login, logout, and clear error states.
-- Extend the single `src/proxy.ts` so Supabase sessions are refreshed while the
-  existing locale behavior remains unchanged.
-- Add a server-only authorization/data-access function and enforce it close to
-  protected data and every future Server Action. Proxy redirects are only an
-  optimistic first check.
-- Add the protected `/admin` layout and responsive CMS navigation using
-  shadcn/Base UI.
-- Do not add public signup, roles, membership tables, or multi-restaurant logic.
-- Prerequisite: disable public signup and manually create at least one admin in
-  Supabase Auth.
-- Current hosted Auth check: public signup is enabled and there are zero users,
-  so both prerequisite actions are still outstanding.
 
 ### Stage 4 — Category management
 
@@ -133,8 +148,9 @@ Status: complete and committed in `d682d1`.
 
 ## Suggested next-thread prompt
 
-> Read `AGENTS.md`, `docs/STATUS.md`, and the relevant project docs. Continue
-> with Stage 3B using a fresh dedicated subagent. First verify the current Git
-> status and that Supabase public signup is disabled and an administrator exists.
-> Preserve the completed public menu and compose admin session handling into the
-> existing single `src/proxy.ts`.
+> Read `AGENTS.md`, `docs/STATUS.md`, and the relevant project docs. First
+> verify the current Git status and hosted Auth readiness: public signup must be
+> disabled and a manually created administrator must exist. Do not reimplement
+> completed Stage 3B. Once hosted Auth is ready, continue with Stage 4 category
+> management using a fresh dedicated subagent, preserving the public menu and
+> Stage 3B authorization patterns.
