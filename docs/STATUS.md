@@ -66,7 +66,7 @@ Status: complete and committed in `d682d1`.
 
 ### Stage 3B — Admin authentication and CMS shell
 
-Status: code complete; hosted authentication readiness remains outstanding.
+Status: complete.
 
 - Added `/admin/login` email/password sign-in using React Hook Form and a
   shared Zod schema, with independent server-side validation and accessible
@@ -100,25 +100,30 @@ Status: code complete; hosted authentication readiness remains outstanding.
 - No restaurant, tenant, organization, membership, billing, ordering, cart, or
   payment concepts should be introduced.
 
-## Remaining work
-
 ### Hosted authentication readiness
 
-- Hosted prerequisite: Supabase Auth currently has public signup enabled
-  (`disable_signup = false`) and zero administrators. Before the CMS can be
-  used, disable public signup and manually create an administrator in Supabase
-  Auth. This stage intentionally did not mutate hosted Auth or create
-  credentials.
+- Status: ready. Public signup has been disabled and an administrator was
+  created manually in Supabase Auth. The hosted project was verified to contain
+  one administrator on 2026-09-03; no credentials are stored in the repository.
 
-## Remaining stages
+## Latest completed stage
 
 ### Stage 4 — Category management
 
-- Category list, create/edit forms, delete handling, enabled toggles, and
-  drag-and-drop ordering.
-- Use React Hook Form, Zod, server-side validation, protected Server Actions,
-  and `dnd-kit` for ordering.
-- Invalidate the `public-menu` cache after successful mutations.
+Status: code complete.
+
+- Added an independently protected category read and `/admin/categories` CMS
+  screen with responsive list, empty, and data-error states.
+- Added bilingual React Hook Form create/edit validation plus independent Zod
+  validation in every protected Server Action.
+- Added enabled/disabled controls, item-aware deletion messaging for the
+  database's `ON DELETE RESTRICT` behavior, and accessible pointer/keyboard
+  drag-and-drop ordering through `dnd-kit`.
+- Category mutations use Next 16 `updateTag` to expire the `public-menu` cache
+  tag immediately after a successful write. Reorder requests validate against
+  the complete current category ID set before applying the new order.
+
+## Remaining stages
 
 ### Stage 5 — Menu item and image management
 
