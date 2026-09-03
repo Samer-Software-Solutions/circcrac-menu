@@ -176,12 +176,16 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
           </section>
         ) : (
           <div className="pb-20 sm:pb-28">
-            {categories.map((category) => {
+            {categories.map((category, categoryIndex) => {
               const categoryName = getLocalizedValue(
                 locale,
                 category.nameEn,
                 category.nameAr,
               );
+              const eagerImageItemId =
+                categoryIndex === 0
+                  ? category.items.find((item) => item.imageUrl)?.id
+                  : undefined;
 
               return (
                 <section
@@ -224,6 +228,7 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
                             name={name}
                             description={description || null}
                             price={priceFormatter.format(item.price)}
+                            eagerImage={item.id === eagerImageItemId}
                             imageUrl={item.imageUrl}
                             imageAlt={t("itemImageAlt", { itemName: name })}
                             available={item.available}

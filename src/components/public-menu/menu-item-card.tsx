@@ -3,6 +3,7 @@ import Image from "next/image";
 type MenuItemCardProps = {
   available: boolean;
   description: string | null;
+  eagerImage: boolean;
   imageAlt: string;
   imageUrl: string | null;
   name: string;
@@ -13,6 +14,7 @@ type MenuItemCardProps = {
 export function MenuItemCard({
   available,
   description,
+  eagerImage,
   imageAlt,
   imageUrl,
   name,
@@ -29,6 +31,7 @@ export function MenuItemCard({
             src={imageUrl}
             alt={imageAlt}
             fill
+            loading={eagerImage ? "eager" : "lazy"}
             sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1199px) calc(50vw - 52px), 520px"
             className="object-cover"
           />

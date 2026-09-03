@@ -85,6 +85,21 @@ Status: complete.
 - No signup, roles, memberships, service-role client, tenant concepts, or
   database changes were introduced.
 
+### Stage 4 — Category management
+
+Status: code complete.
+
+- Added an independently protected category read and `/admin/categories` CMS
+  screen with responsive list, empty, and data-error states.
+- Added bilingual React Hook Form create/edit validation plus independent Zod
+  validation in every protected Server Action.
+- Added enabled/disabled controls, item-aware deletion messaging for the
+  database's `ON DELETE RESTRICT` behavior, and accessible pointer/keyboard
+  drag-and-drop ordering through `dnd-kit`.
+- Category mutations use Next 16 `updateTag` to expire the `public-menu` cache
+  tag immediately after a successful write. Reorder requests validate against
+  the complete current category ID set before applying the new order.
+
 ## Architecture decisions already made
 
 - The permanent QR URL is `/`; public content uses explicit locale URLs.
@@ -108,31 +123,27 @@ Status: complete.
 
 ## Latest completed stage
 
-### Stage 4 — Category management
+### Stage 5 — Menu item and image management
 
 Status: code complete.
 
-- Added an independently protected category read and `/admin/categories` CMS
-  screen with responsive list, empty, and data-error states.
-- Added bilingual React Hook Form create/edit validation plus independent Zod
-  validation in every protected Server Action.
-- Added enabled/disabled controls, item-aware deletion messaging for the
-  database's `ON DELETE RESTRICT` behavior, and accessible pointer/keyboard
-  drag-and-drop ordering through `dnd-kit`.
-- Category mutations use Next 16 `updateTag` to expire the `public-menu` cache
-  tag immediately after a successful write. Reorder requests validate against
-  the complete current category ID set before applying the new order.
+- Added a protected responsive menu-item CMS list with useful empty and data-error states.
+- Added bilingual React Hook Form/Zod create and edit validation, plus independent
+  Zod validation in every protected item action.
+- Added category assignment, optional bilingual descriptions, exact
+  `numeric(10,2)`-compatible non-negative price validation, and availability controls.
+- Added accessible pointer and keyboard `dnd-kit` ordering scoped to individual categories.
+- Added JPEG/PNG/WebP/AVIF upload, replace, and remove workflows for the public
+  `menu-images` bucket. Files are limited to 5 MiB, get unique safe item paths,
+  and are cleaned up appropriately on failed database writes or after replacement/deletion.
+- Added reference checks before object deletion (including item and settings image
+  paths), with clear administrator warnings if a storage cleanup fails.
+- Configured Next Server Actions with a 6 MiB request limit so valid 5 MiB uploads
+  reach application validation. All successful public-data mutations call
+  `updateTag('public-menu')`.
+- Verified with ESLint, `tsc --noEmit`, and a production build.
 
 ## Remaining stages
-
-### Stage 5 — Menu item and image management
-
-- Item list and bilingual create/edit forms.
-- Category assignment, exact price editing, descriptions, availability, and
-  drag-and-drop ordering within categories.
-- Upload, replace, and remove images in Supabase Storage with validation and
-  cleanup of replaced objects.
-- Invalidate the `public-menu` cache after successful mutations.
 
 ### Stage 6 — Restaurant settings and QR code
 
@@ -153,9 +164,11 @@ Status: code complete.
 
 ## Suggested next-thread prompt
 
-> Read `AGENTS.md`, `docs/STATUS.md`, and the relevant project docs. First
-> verify the current Git status and hosted Auth readiness: public signup must be
-> disabled and a manually created administrator must exist. Do not reimplement
-> completed Stage 3B. Once hosted Auth is ready, continue with Stage 4 category
-> management using a fresh dedicated subagent, preserving the public menu and
-> Stage 3B authorization patterns.
+> Read `AGENTS.md`, `docs/STATUS.md`, `docs/REQUIREMENTS.md`,
+> `docs/DESIGN.md`, and `docs/DATABASE.md`, then the relevant local Next.js 16
+> documentation. Continue with Stage 6 using a fresh dedicated subagent:
+> singleton restaurant settings and permanent public-menu QR code generation.
+> Preserve the Stage 5 Supabase Storage cleanup/reference-check patterns and
+> invalidate `public-menu` with `updateTag` after every successful public-data
+> mutation. Do not introduce multi-restaurant concepts or schema changes unless
+> they are genuinely required.

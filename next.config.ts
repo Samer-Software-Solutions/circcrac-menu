@@ -8,6 +8,13 @@ const supabaseProtocol = publicSupabaseEnv.url.protocol.slice(0, -1) as
   | "https";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // The storage policy accepts images up to 5 MiB. Server Actions otherwise
+    // reject multipart form bodies at 1 MiB before application validation runs.
+    serverActions: {
+      bodySizeLimit: "6mb",
+    },
+  },
   images: {
     remotePatterns: [
       {
