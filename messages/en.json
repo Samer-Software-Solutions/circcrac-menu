@@ -1,0 +1,21 @@
+{
+  "Metadata": {
+    "applicationName": "CricCrac Menu",
+    "title": "CricCrac Menu",
+    "description": "A bilingual digital restaurant menu in English and Arabic."
+  },
+  "HomePage": {
+    "brandLabel": "CricCrac Menu",
+    "eyebrow": "Digital menu foundation",
+    "title": "Your menu is taking shape.",
+    "description": "English and Arabic routing is ready. Restaurant categories and menu items will arrive in the next phase.",
+    "status": "English · Left to right",
+    "switchLanguage": "العربية",
+    "switchLanguageLabel": "View the menu in Arabic"
+  },
+  "NotFoundPage": {
+    "title": "Page not found",
+    "description": "The page you requested is not available.",
+    "returnHome": "Return to menu"
+  }
+}
