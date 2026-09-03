@@ -9,6 +9,7 @@ export const PUBLIC_MENU_CACHE_TAG = "public-menu";
 
 type PublicMenuSettings = {
   currency: string;
+  defaultLanguage: "en" | "ar";
   logoUrl: string | null;
   primaryColor: string | null;
   restaurantNameAr: string;
@@ -55,7 +56,7 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
     supabase
       .from("settings")
       .select(
-        "currency, logo_path, primary_color, restaurant_name_ar, restaurant_name_en",
+        "currency, default_language, logo_path, primary_color, restaurant_name_ar, restaurant_name_en",
       )
       .limit(1)
       .maybeSingle(),
@@ -125,6 +126,8 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
   return {
     settings: {
       currency: settingsResult.data.currency,
+      defaultLanguage:
+        settingsResult.data.default_language === "ar" ? "ar" : "en",
       logoUrl: publicImageUrl(settingsResult.data.logo_path),
       primaryColor: settingsResult.data.primary_color,
       restaurantNameAr: settingsResult.data.restaurant_name_ar,

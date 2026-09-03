@@ -143,15 +143,28 @@ Status: code complete.
   `updateTag('public-menu')`.
 - Verified with ESLint, `tsc --noEmit`, and a production build.
 
-## Remaining stages
-
 ### Stage 6 — Restaurant settings and QR code
 
-- Edit bilingual restaurant names, logo, currency, primary color, and default
-  language.
-- Generate the permanent public-menu QR code with reliable PNG and SVG export
-  suitable for printing.
-- Invalidate the `public-menu` cache after settings changes.
+Status: code complete.
+
+- Added a protected singleton settings read and a responsive React Hook Form/
+  Zod CMS form for bilingual names, currency, primary color, default language,
+  and an optional logo.
+- Settings mutations independently authorize and validate on the server, update
+  only the existing singleton row, invalidate `public-menu`, and use the same
+  cross-reference storage cleanup safety as menu item images.
+- The permanent `/` entry now honors a valid locale cookie, then detected
+  `Accept-Language`, then the settings default language. Proxy session refresh
+  remains in place while the root Server Component performs the dynamic
+  fallback.
+- Added protected QR preview plus 2048px PNG and SVG downloads. QR payloads
+  are always the site root; logo overlays use high error correction and fall
+  back cleanly to logo-free output if the public logo cannot load.
+- `SITE_URL` optionally fixes the print canonical origin; otherwise the QR
+  screen uses the request origin.
+- Verified with ESLint, `tsc --noEmit`, and a production build.
+
+## Remaining stages
 
 ### Stage 7 — Final QA and deployment
 
@@ -166,9 +179,8 @@ Status: code complete.
 
 > Read `AGENTS.md`, `docs/STATUS.md`, `docs/REQUIREMENTS.md`,
 > `docs/DESIGN.md`, and `docs/DATABASE.md`, then the relevant local Next.js 16
-> documentation. Continue with Stage 6 using a fresh dedicated subagent:
-> singleton restaurant settings and permanent public-menu QR code generation.
-> Preserve the Stage 5 Supabase Storage cleanup/reference-check patterns and
-> invalidate `public-menu` with `updateTag` after every successful public-data
-> mutation. Do not introduce multi-restaurant concepts or schema changes unless
-> they are genuinely required.
+> documentation. Continue with Stage 7 using a fresh dedicated subagent: final
+> QA and deployment readiness across mobile/tablet/desktop, English/Arabic RTL,
+> accessibility, authentication, RLS, cache invalidation, image failure, empty
+> states, and all CMS mutations. Do not introduce multi-restaurant concepts or
+> schema changes unless they are genuinely required.

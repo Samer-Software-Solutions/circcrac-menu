@@ -13,6 +13,10 @@ with Next.js and Supabase.
 `NEXT_PUBLIC_SUPABASE_URL` must be the project base URL, such as
 `https://project-ref.supabase.co`, without `/rest/v1` or another path.
 
+`SITE_URL` is optional. Set it to the canonical public origin (for example,
+`https://menu.example.com`) before printing QR codes. The CMS otherwise uses
+the origin of the current request; in either case QR codes always encode `/`.
+
 ## Database setup
 
 The schema and storage policies are defined in `supabase/migrations/`, and the

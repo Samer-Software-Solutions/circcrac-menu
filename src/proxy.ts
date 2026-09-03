@@ -83,6 +83,13 @@ export async function proxy(request: NextRequest) {
     return createResponse(NextResponse.next({ request }));
   }
 
+  // The permanent QR entry is resolved by the root Server Component so its
+  // fallback can use the singleton's configured default language. Keep this
+  // Proxy active here to preserve Supabase session refresh behavior.
+  if (pathname === "/") {
+    return createResponse(NextResponse.next({ request }));
+  }
+
   return createResponse(handleI18nRouting(request));
 }
 
