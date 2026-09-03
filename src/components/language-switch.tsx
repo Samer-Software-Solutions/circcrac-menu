@@ -22,7 +22,7 @@ export function LanguageSwitch({
       lang={targetLocale}
       dir={targetLocale === "ar" ? "rtl" : "ltr"}
       aria-label={accessibleLabel}
-      className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-4 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+      className="inline-flex min-h-11 items-center justify-center rounded-full border border-stone-900/10 bg-white/80 px-4 text-sm font-semibold text-stone-800 shadow-sm backdrop-blur-sm transition-colors hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-800"
     >
       {label}
     </Link>

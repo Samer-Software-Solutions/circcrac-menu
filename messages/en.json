@@ -1,15 +1,21 @@
 {
   "Metadata": {
     "applicationName": "CricCrac Menu",
-    "title": "CricCrac Menu",
-    "description": "A bilingual digital restaurant menu in English and Arabic."
+    "title": "{restaurantName} | Menu",
+    "description": "Browse the restaurant menu in English or Arabic."
   },
-  "HomePage": {
-    "brandLabel": "CricCrac Menu",
-    "eyebrow": "Digital menu foundation",
-    "title": "Your menu is taking shape.",
-    "description": "English and Arabic routing is ready. Restaurant categories and menu items will arrive in the next phase.",
-    "status": "English · Left to right",
+  "PublicMenu": {
+    "menuLabel": "Menu",
+    "logoAlt": "{restaurantName} logo",
+    "itemImageAlt": "{itemName}",
+    "categoryNavigationLabel": "Menu categories",
+    "unavailable": "Currently unavailable",
+    "emptyCategory": "No items are available in this category yet.",
+    "emptyTitle": "The menu is being prepared",
+    "emptyDescription": "Please check back soon for the latest dishes.",
+    "errorTitle": "We couldn't load the menu",
+    "errorDescription": "Please refresh the page or try again in a few moments.",
+    "loadingLabel": "Loading menu",
     "switchLanguage": "العربية",
     "switchLanguageLabel": "View the menu in Arabic"
   },

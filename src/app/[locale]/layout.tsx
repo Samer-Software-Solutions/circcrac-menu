@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 
 import { fontVariables } from "@/app/fonts";
 import { routing } from "@/i18n/routing";
+import { getPublicMenu } from "@/lib/data/public-menu";
 
 import "../globals.css";
 
@@ -29,17 +30,27 @@ export async function generateMetadata({
     notFound();
   }
 
-  const t = await getTranslations({ locale, namespace: "Metadata" });
+  const [t, menuResult] = await Promise.all([
+    getTranslations({ locale, namespace: "Metadata" }),
+    getPublicMenu(),
+  ]);
+  const restaurantName =
+    menuResult.status === "ready"
+      ? locale === "ar"
+        ? menuResult.data.settings.restaurantNameAr
+        : menuResult.data.settings.restaurantNameEn
+      : t("applicationName");
 
   return {
-    applicationName: t("applicationName"),
-    title: t("title"),
+    applicationName: restaurantName,
+    title: t("title", { restaurantName }),
     description: t("description"),
     alternates: {
       canonical: `/${locale}`,
       languages: {
         en: "/en",
         ar: "/ar",
+        "x-default": "/",
       },
     },
   };
