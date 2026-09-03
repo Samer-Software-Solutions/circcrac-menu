@@ -174,13 +174,3 @@ Status: code complete.
   ordering, and all CMS mutations.
 - Run ESLint, TypeScript, and a production build, then prepare deployment and
   environment configuration.
-
-## Suggested next-thread prompt
-
-> Read `AGENTS.md`, `docs/STATUS.md`, `docs/REQUIREMENTS.md`,
-> `docs/DESIGN.md`, and `docs/DATABASE.md`, then the relevant local Next.js 16
-> documentation. Continue with Stage 7 using a fresh dedicated subagent: final
-> QA and deployment readiness across mobile/tablet/desktop, English/Arabic RTL,
-> accessibility, authentication, RLS, cache invalidation, image failure, empty
-> states, and all CMS mutations. Do not introduce multi-restaurant concepts or
-> schema changes unless they are genuinely required.
