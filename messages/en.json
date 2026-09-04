@@ -6,6 +6,7 @@
   },
   "PublicMenu": {
     "menuLabel": "Menu",
+    "menuStats": "{itemCount, plural, one {# dish} other {# dishes}} across {categoryCount, plural, one {# category} other {# categories}}",
     "logoAlt": "{restaurantName} logo",
     "itemImageAlt": "{itemName}",
     "categoryNavigationLabel": "Menu categories",

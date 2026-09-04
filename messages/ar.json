@@ -6,6 +6,7 @@
   },
   "PublicMenu": {
     "menuLabel": "القائمة",
+    "menuStats": "{itemCount, plural, zero {لا أطباق} one {طبق واحد} two {طبقان} few {# أطباق} many {# طبقًا} other {# طبق}} ضمن {categoryCount, plural, zero {لا أقسام} one {قسم واحد} two {قسمان} few {# أقسام} many {# قسمًا} other {# قسم}}",
     "logoAlt": "شعار {restaurantName}",
     "itemImageAlt": "{itemName}",
     "categoryNavigationLabel": "أقسام القائمة",

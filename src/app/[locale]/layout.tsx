@@ -9,6 +9,7 @@ import { routing } from "@/i18n/routing";
 import { getPublicMenu } from "@/lib/data/public-menu";
 
 import "../globals.css";
+import { menuFontVariables } from "./menu-fonts";
 
 type LocaleLayoutProps = {
   children: ReactNode;
@@ -70,7 +71,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       dir={locale === "ar" ? "rtl" : "ltr"}
-      className={`${fontVariables} h-full antialiased`}
+      className={`${fontVariables} ${menuFontVariables} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <NextIntlClientProvider locale={locale} messages={null}>

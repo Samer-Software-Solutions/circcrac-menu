@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type CategoryNavigationItem = {
   id: string;
@@ -16,6 +16,10 @@ function categorySectionId(id: string) {
   return `category-${id}`;
 }
 
+function toIndexLabel(position: number) {
+  return String(position).padStart(2, "0");
+}
+
 export function CategoryNavigation({
   ariaLabel,
   categories,
@@ -23,6 +27,7 @@ export function CategoryNavigation({
   const [activeCategory, setActiveCategory] = useState(
     categories[0]?.id ?? null,
   );
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const sections = categories
@@ -57,6 +62,37 @@ export function CategoryNavigation({
     return () => observer.disconnect();
   }, [categories]);
 
+  // Reading-progress fill: written straight to the DOM via a ref rather than
+  // React state, since it changes on every scroll tick and doesn't need to
+  // trigger a render.
+  useEffect(() => {
+    let frame = 0;
+
+    function updateProgress() {
+      frame = 0;
+      const root = document.documentElement;
+      const scrollable = root.scrollHeight - root.clientHeight;
+      const progress = scrollable > 0 ? (root.scrollTop / scrollable) * 100 : 0;
+
+      if (progressRef.current) {
+        progressRef.current.style.width = `${Math.min(100, Math.max(0, progress))}%`;
+      }
+    }
+
+    function onScroll() {
+      if (frame) return;
+      frame = requestAnimationFrame(updateProgress);
+    }
+
+    updateProgress();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, []);
+
   function selectCategory(id: string) {
     setActiveCategory(id);
     const prefersReducedMotion = window.matchMedia(
@@ -71,9 +107,10 @@ export function CategoryNavigation({
   }
 
   return (
-    <nav aria-label={ariaLabel} className="menu-category-nav">
-      <div className="menu-category-scroll">
-        {categories.map((category) => {
+    <nav aria-label={ariaLabel} className="menu-nav">
+      <div ref={progressRef} className="menu-nav-progress" aria-hidden="true" />
+      <div className="menu-nav-scroll">
+        {categories.map((category, index) => {
           const isActive = activeCategory === category.id;
 
           return (
@@ -81,13 +118,16 @@ export function CategoryNavigation({
               key={category.id}
               href={`#${categorySectionId(category.id)}`}
               aria-current={isActive ? "location" : undefined}
-              className="menu-category-link"
+              className="menu-nav-item"
               onClick={(event) => {
                 event.preventDefault();
                 selectCategory(category.id);
               }}
             >
-              {category.label}
+              <span className="menu-nav-index" aria-hidden="true">
+                {toIndexLabel(index + 1)}
+              </span>
+              <span className="menu-nav-label">{category.label}</span>
             </a>
           );
         })}

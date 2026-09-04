@@ -11,10 +11,14 @@ import {
   CategoryNavigation,
   type CategoryNavigationItem,
 } from "@/components/public-menu/category-navigation";
-import { MenuItemCard } from "@/components/public-menu/menu-item-card";
+import { MenuItemRow } from "@/components/public-menu/menu-item-row";
 import { MenuSkeleton } from "@/components/public-menu/menu-skeleton";
+import { MenuSpotlightItem } from "@/components/public-menu/menu-spotlight-item";
 import { routing } from "@/i18n/routing";
-import { getPublicMenu } from "@/lib/data/public-menu";
+import {
+  getPublicMenu,
+  type PublicMenuItem,
+} from "@/lib/data/public-menu";
 
 type HomePageProps = {
   params: Promise<{ locale: string }>;
@@ -62,6 +66,16 @@ function createPriceFormatter(locale: "en" | "ar", currency: string) {
   }
 }
 
+type SpotlightItem = PublicMenuItem & { imageUrl: string };
+
+function findSpotlightItem(items: PublicMenuItem[]): SpotlightItem | null {
+  return (
+    items.find(
+      (item): item is SpotlightItem => Boolean(item.imageUrl) && item.available,
+    ) ?? null
+  );
+}
+
 async function MenuContent({ locale }: { locale: "en" | "ar" }) {
   const [menuResult, t] = await Promise.all([
     getPublicMenu(),
@@ -71,7 +85,7 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
   if (menuResult.status === "error") {
     return (
       <main
-        className="min-h-dvh bg-[#f7f4ee] text-stone-900"
+        className="menu-page"
         style={{ "--menu-brand": DEFAULT_MENU_BRAND_COLOR } as MenuBrandStyle}
       >
         <div className="menu-shell flex min-h-dvh flex-col">
@@ -87,7 +101,7 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
           </header>
           <section className="my-auto max-w-lg py-20">
             <p className="menu-eyebrow">{t("menuLabel")}</p>
-            <h1 className="mt-4 text-3xl leading-tight font-semibold tracking-[-0.035em] sm:text-4xl">
+            <h1 className="menu-serif mt-4 text-3xl leading-tight font-semibold tracking-[-0.035em] sm:text-4xl">
               {t("errorTitle")}
             </h1>
             <p className="mt-4 leading-7 text-stone-600">
@@ -115,12 +129,13 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
   const menuStyle: MenuBrandStyle = {
     "--menu-brand": settings.primaryColor ?? DEFAULT_MENU_BRAND_COLOR,
   };
+  const totalItemCount = categories.reduce(
+    (total, category) => total + category.items.length,
+    0,
+  );
 
   return (
-    <main
-      className="min-h-dvh bg-[#f7f4ee] text-stone-900"
-      style={menuStyle}
-    >
+    <main className="menu-page" style={menuStyle}>
       <div className="menu-shell">
         <header className="menu-header">
           <div className="flex min-w-0 items-center gap-3.5">
@@ -150,12 +165,27 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
           />
         </header>
 
-        <div className="menu-intro">
-          <p className="menu-eyebrow">{t("menuLabel")}</p>
-          <h1 className="mt-4 max-w-3xl text-[2.65rem] leading-[1.07] font-semibold tracking-[-0.045em] text-balance sm:text-6xl sm:leading-[1.04]">
-            {restaurantName}
-          </h1>
-          <span className="menu-brand-rule mt-7 block h-1 w-14 rounded-full" />
+        <div className="menu-hero">
+          <div className="menu-intro">
+            <p className="menu-eyebrow">{t("menuLabel")}</p>
+            <h1 className="menu-title">{restaurantName}</h1>
+            <svg
+              className="menu-title-flourish"
+              viewBox="0 0 120 12"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path d="M2 8C15 2 25 10 38 6C51 2 61 10 74 6C87 2 97 10 110 6" />
+            </svg>
+            {totalItemCount > 0 ? (
+              <p className="menu-stats">
+                {t("menuStats", {
+                  itemCount: totalItemCount,
+                  categoryCount: categories.length,
+                })}
+              </p>
+            ) : null}
+          </div>
         </div>
 
         {categories.length > 0 ? (
@@ -167,7 +197,7 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
 
         {categories.length === 0 ? (
           <section className="menu-empty-state">
-            <h2 className="text-2xl font-semibold tracking-[-0.025em]">
+            <h2 className="menu-serif text-2xl font-semibold tracking-[-0.025em]">
               {t("emptyTitle")}
             </h2>
             <p className="mt-3 leading-7 text-stone-600">
@@ -175,17 +205,36 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
             </p>
           </section>
         ) : (
-          <div className="pb-20 sm:pb-28">
+          <div className="menu-categories">
             {categories.map((category, categoryIndex) => {
               const categoryName = getLocalizedValue(
                 locale,
                 category.nameEn,
                 category.nameAr,
               );
-              const eagerImageItemId =
-                categoryIndex === 0
-                  ? category.items.find((item) => item.imageUrl)?.id
-                  : undefined;
+              const spotlightItem = findSpotlightItem(category.items);
+              const listItems = category.items.filter(
+                (item) => item.id !== spotlightItem?.id,
+              );
+
+              function itemView(item: PublicMenuItem) {
+                const name = getLocalizedValue(
+                  locale,
+                  item.nameEn,
+                  item.nameAr,
+                );
+                const description = getLocalizedValue(
+                  locale,
+                  item.descriptionEn ?? "",
+                  item.descriptionAr ?? "",
+                );
+
+                return { name, description: description || null };
+              }
+
+              const spotlightView = spotlightItem
+                ? itemView(spotlightItem)
+                : null;
 
               return (
                 <section
@@ -194,49 +243,64 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
                   aria-labelledby={`category-heading-${category.id}`}
                   className="menu-section"
                 >
-                  <div className="mb-7 flex items-center gap-4 sm:mb-9">
+                  <div className="menu-category-head">
+                    <span className="menu-category-index" aria-hidden="true">
+                      {String(categoryIndex + 1).padStart(2, "0")}
+                    </span>
                     <h2
                       id={`category-heading-${category.id}`}
-                      className="text-[1.65rem] leading-tight font-semibold tracking-[-0.035em] sm:text-3xl"
+                      className="menu-category-name"
                     >
                       {categoryName}
                     </h2>
-                    <span className="h-px flex-1 bg-stone-300/75" />
+                    <span className="menu-category-rule" aria-hidden="true" />
                   </div>
 
                   {category.items.length === 0 ? (
-                    <p className="py-5 text-sm leading-6 text-stone-500">
+                    <p className="menu-category-empty">
                       {t("emptyCategory")}
                     </p>
                   ) : (
-                    <div className="menu-items-grid">
-                      {category.items.map((item) => {
-                        const name = getLocalizedValue(
-                          locale,
-                          item.nameEn,
-                          item.nameAr,
-                        );
-                        const description = getLocalizedValue(
-                          locale,
-                          item.descriptionEn ?? "",
-                          item.descriptionAr ?? "",
-                        );
+                    <>
+                      {spotlightItem && spotlightView ? (
+                        <MenuSpotlightItem
+                          name={spotlightView.name}
+                          description={spotlightView.description}
+                          price={priceFormatter.format(spotlightItem.price)}
+                          imageUrl={spotlightItem.imageUrl}
+                          imageAlt={t("itemImageAlt", {
+                            itemName: spotlightView.name,
+                          })}
+                          available={spotlightItem.available}
+                          eagerImage={categoryIndex === 0}
+                          unavailableLabel={t("unavailable")}
+                        />
+                      ) : null}
 
-                        return (
-                          <MenuItemCard
-                            key={item.id}
-                            name={name}
-                            description={description || null}
-                            price={priceFormatter.format(item.price)}
-                            eagerImage={item.id === eagerImageItemId}
-                            imageUrl={item.imageUrl}
-                            imageAlt={t("itemImageAlt", { itemName: name })}
-                            available={item.available}
-                            unavailableLabel={t("unavailable")}
-                          />
-                        );
-                      })}
-                    </div>
+                      {listItems.length > 0 ? (
+                        <div className="menu-items-list">
+                          {listItems.map((item) => {
+                            const { name, description } = itemView(item);
+
+                            return (
+                              <MenuItemRow
+                                key={item.id}
+                                name={name}
+                                description={description}
+                                price={priceFormatter.format(item.price)}
+                                eagerImage={false}
+                                imageUrl={item.imageUrl}
+                                imageAlt={t("itemImageAlt", {
+                                  itemName: name,
+                                })}
+                                available={item.available}
+                                unavailableLabel={t("unavailable")}
+                              />
+                            );
+                          })}
+                        </div>
+                      ) : null}
+                    </>
                   )}
                 </section>
               );
