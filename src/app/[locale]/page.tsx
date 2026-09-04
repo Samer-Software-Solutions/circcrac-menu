@@ -3,7 +3,6 @@ import { Suspense } from "react";
 
 import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 
 import { LanguageSwitch } from "@/components/language-switch";
@@ -11,6 +10,7 @@ import {
   CategoryNavigation,
   type CategoryNavigationItem,
 } from "@/components/public-menu/category-navigation";
+import { MenuHero } from "@/components/public-menu/menu-hero";
 import { MenuItemCard } from "@/components/public-menu/menu-item-card";
 import { MenuSkeleton } from "@/components/public-menu/menu-skeleton";
 import { routing } from "@/i18n/routing";
@@ -115,53 +115,41 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
   const menuStyle: MenuBrandStyle = {
     "--menu-brand": settings.primaryColor ?? DEFAULT_MENU_BRAND_COLOR,
   };
+  const heroImages = categories
+    .flatMap((category) => category.items)
+    .map((item) => item.imageUrl)
+    .filter((imageUrl): imageUrl is string => Boolean(imageUrl))
+    .slice(0, 3);
+  const heroSubtitle =
+    navigationCategories.length > 0
+      ? navigationCategories.map((category) => category.label).join(" · ")
+      : null;
 
   return (
     <main
       className="min-h-dvh bg-[#f7f4ee] text-stone-900"
       style={menuStyle}
     >
+      <MenuHero
+        currentLocale={locale}
+        heroImages={heroImages}
+        logoAlt={t("logoAlt", { restaurantName })}
+        logoUrl={settings.logoUrl}
+        monogram={getMonogram(restaurantName)}
+        restaurantName={restaurantName}
+        subtitle={heroSubtitle}
+        switchLanguageAccessibleLabel={t("switchLanguageLabel")}
+        switchLanguageLabel={t("switchLanguage")}
+      />
+
       <div className="menu-shell">
-        <header className="menu-header">
-          <div className="flex min-w-0 items-center gap-3.5">
-            {settings.logoUrl ? (
-              <div className="menu-logo-frame">
-                <Image
-                  src={settings.logoUrl}
-                  alt={t("logoAlt", { restaurantName })}
-                  width={64}
-                  height={64}
-                  sizes="64px"
-                  className="size-full object-contain"
-                  priority
-                />
-              </div>
-            ) : (
-              <span className="menu-monogram" aria-hidden="true">
-                {getMonogram(restaurantName)}
-              </span>
-            )}
-          </div>
-
-          <LanguageSwitch
-            currentLocale={locale}
-            label={t("switchLanguage")}
-            accessibleLabel={t("switchLanguageLabel")}
-          />
-        </header>
-
-        <div className="menu-intro">
-          <p className="menu-eyebrow">{t("menuLabel")}</p>
-          <h1 className="mt-4 max-w-3xl text-[2.65rem] leading-[1.07] font-semibold tracking-[-0.045em] text-balance sm:text-6xl sm:leading-[1.04]">
-            {restaurantName}
-          </h1>
-          <span className="menu-brand-rule mt-7 block h-1 w-14 rounded-full" />
-        </div>
-
         {categories.length > 0 ? (
           <CategoryNavigation
             ariaLabel={t("categoryNavigationLabel")}
             categories={navigationCategories}
+            closeQuickJumpLabel={t("closeQuickJump")}
+            openQuickJumpLabel={t("openQuickJump")}
+            quickJumpTitle={t("quickJumpTitle")}
           />
         ) : null}
 
