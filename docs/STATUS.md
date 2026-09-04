@@ -1,6 +1,6 @@
 # CricCrac Menu — Project Status
 
-Last updated: 2026-09-03
+Last updated: 2026-09-04
 
 ## Scope and working agreement
 
@@ -142,6 +142,32 @@ Status: code complete.
   reach application validation. All successful public-data mutations call
   `updateTag('public-menu')`.
 - Verified with ESLint, `tsc --noEmit`, and a production build.
+
+### Stage 3A.1 — Public menu hero redesign
+
+Status: code complete, merged to `main`. UI is intentionally a first pass —
+see `docs/DESIGN.md` "Known rough edges" for the planned follow-up polish.
+
+- Replaced the plain header/intro with a hero banner (`MenuHero`): a collage
+  of up to 3 existing menu-item photos, or a `primaryColor` gradient +
+  monogram fallback when no item photos exist yet, overlapped by a card with
+  the logo, restaurant name, and a category-name subtitle. No `settings`
+  schema change was made — see `docs/DESIGN.md` before adding a dedicated
+  banner field.
+- Evolved `CategoryNavigation` into a filled-pill tab bar plus a hamburger
+  button that opens a Base UI `Dialog` bottom sheet listing every category
+  for one-tap quick-jump navigation.
+- Updated `MenuSkeleton` to mirror the new hero/nav structure so there is no
+  layout shift while the page loads.
+- Added `PublicMenu.openQuickJump` / `closeQuickJump` / `quickJumpTitle` to
+  both `messages/en.json` and `messages/ar.json`.
+- Verified at mobile and desktop widths, in both locales, with true RTL
+  mirroring (logo/hamburger side, tab order, subtitle alignment) — not just
+  right-aligned text. Verified with ESLint, `tsc --noEmit`, and a production
+  build.
+- An alternate full redesign (editorial/print-menu style) was prototyped
+  side-by-side on `feature/menu-creative-redesign` and intentionally not
+  merged; the branch is kept for reference only.
 
 ### Stage 6 — Restaurant settings and QR code
 

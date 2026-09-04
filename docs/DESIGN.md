@@ -76,6 +76,63 @@ Horizontal scrolling is acceptable for categories.
 
 ---
 
+## Current Hero & Navigation Implementation (2026-09-04)
+
+The layout above is currently implemented as a hero-banner pattern, inspired by
+food-delivery app product pages (Talabat) but stripped of anything order/
+delivery-related (no ratings, delivery time, cart, or favorite icons).
+
+- `src/components/public-menu/menu-hero.tsx` renders a full-bleed banner at the
+  top of the page, followed by a rounded card that overlaps the bottom of the
+  banner with the logo (or a monogram fallback), the restaurant name, and a
+  subtitle built by joining every category name with " · ".
+- **There is no dedicated banner/cover-image field in `settings`.** The banner
+  is synthesized entirely from existing data: a CSS-grid collage of the first
+  up to 3 menu item photos found across categories (in category/item order),
+  or — when zero item photos exist yet — a gradient built from
+  `settings.primaryColor` with a large translucent monogram watermark. This
+  was a deliberate choice to avoid a schema change; see "Known rough edges"
+  below if a curated banner becomes a real requirement.
+- The language switcher floats over the top corner of the banner (mirrors
+  sides in RTL) instead of sitting in a plain header row.
+- `src/components/public-menu/category-navigation.tsx` renders a horizontal
+  pill tab bar (filled active state) with active-category tracking via
+  `IntersectionObserver`, preceded by a hamburger button. That button opens a
+  Base UI `Dialog` bottom sheet ("quick jump") listing every category so a
+  customer can jump straight to a section without relying on horizontal
+  scroll position — this is the one genuinely new interaction pattern beyond
+  the original scrollable tab bar.
+
+### Known rough edges (next polish pass)
+
+These are real, observed issues worth addressing before calling this final —
+not hypothetical future work:
+
+- The hero collage/subtitle are derived automatically and not curated by the
+  administrator, so as menu content grows the banner and the
+  category-name subtitle can look arbitrary or truncate awkwardly (the
+  subtitle line ellipsizes on narrow screens once there are more than ~4
+  categories).
+- If the restaurant later wants deliberate control over the hero image
+  (rather than "whichever 3 item photos happen to be first"), that requires a
+  new `settings` field and migration — read `docs/DATABASE.md` and get explicit
+  product sign-off before adding one; don't add it speculatively.
+- The horizontal tab bar and the quick-jump sheet both list categories but
+  don't stay in sync visually — selecting a category from the sheet updates
+  the active tab state but does not scroll the tab bar itself so the active
+  pill is back in view.
+- No banner treatment currently exists for the loading skeleton beyond a
+  static placeholder block; double check it against the live hero once real
+  images are in place.
+
+An alternate, fuller redesign concept (an editorial/print-menu style with a
+numbered category index and dotted-leader item rows) was prototyped on the
+now-unmerged branch `feature/menu-creative-redesign`. It was not adopted, but
+is kept around as a reference in case elements of it (e.g. the scroll-progress
+category index) are worth borrowing later.
+
+---
+
 # Food Photography
 
 Food images are an important part of the design.
