@@ -30,6 +30,39 @@ type AdminNavigationProps = {
   compact?: boolean;
 };
 
+type AdminNavigationLinkProps = NavigationItem & {
+  compact: boolean;
+  current?: boolean;
+  className?: string;
+};
+
+function AdminNavigationLink({
+  href,
+  icon: Icon,
+  label,
+  compact,
+  current = false,
+  className,
+}: AdminNavigationLinkProps) {
+  const layoutClasses = compact
+    ? "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+    : "flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
+  const stateClasses = current
+    ? "bg-primary text-primary-foreground shadow-sm"
+    : "text-muted-foreground transition-colors hover:bg-stone-200/70 hover:text-foreground";
+
+  return (
+    <Link
+      href={href}
+      aria-current={current ? "page" : undefined}
+      className={`${layoutClasses} ${stateClasses} ${className ?? ""}`}
+    >
+      <Icon className="size-4 shrink-0" aria-hidden="true" />
+      <span>{label}</span>
+    </Link>
+  );
+}
+
 export function AdminNavigation({ compact = false }: AdminNavigationProps) {
   const pathname = usePathname();
 
@@ -41,36 +74,25 @@ export function AdminNavigation({ compact = false }: AdminNavigationProps) {
       {navigationItems.map(({ href, icon: Icon, label }) => {
         const isCurrent =
           href === "/admin" ? pathname === href : pathname.startsWith(`${href}/`) || pathname === href;
-        const layoutClasses = compact
-          ? "inline-flex h-10 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-          : "flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring";
-        const stateClasses = isCurrent
-          ? "bg-muted text-foreground"
-          : "text-muted-foreground hover:bg-muted hover:text-foreground";
 
         return (
-          <Link
+          <AdminNavigationLink
             key={href}
             href={href}
-            aria-current={isCurrent ? "page" : undefined}
-            className={`${layoutClasses} ${stateClasses}`}
-          >
-            <Icon className="size-4" aria-hidden="true" />
-            {label}
-          </Link>
+            icon={Icon}
+            label={label}
+            compact={compact}
+            current={isCurrent}
+          />
         );
       })}
-      <Link
+      <AdminNavigationLink
         href="/"
-        className={
-          compact
-            ? "inline-flex h-10 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-            : "mt-4 flex h-10 items-center gap-3 rounded-md px-3 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-        }
-      >
-        <ExternalLink className="size-4" aria-hidden="true" />
-        View public menu
-      </Link>
+        icon={ExternalLink}
+        label="View public menu"
+        compact={compact}
+        className={compact ? undefined : "mt-4"}
+      />
     </nav>
   );
 }

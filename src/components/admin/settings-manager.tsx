@@ -10,6 +10,7 @@ import {
   saveSettings,
   type SettingsActionState,
 } from "@/app/(admin)/admin/settings/actions";
+import { useAdminMutationToast } from "@/components/admin/admin-toast-provider";
 import { Button } from "@/components/ui/button";
 import type { AdminSettings } from "@/lib/data/admin-settings";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,7 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
   const [primaryColorValue, setPrimaryColorValue] = useState(
     settings.primaryColor ?? "",
   );
+  const { mutation } = useAdminMutationToast();
   const {
     formState: { errors },
     handleSubmit,
@@ -123,9 +125,22 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     setActionState({});
     setIsSaving(true);
     startTransition(async () => {
-      const result = await saveSettings({}, formData);
-      setActionState(result);
-      if (result.status === "success") {
+      const outcome = await mutation(saveSettings({}, formData), {
+        loading: {
+          description: "Your restaurant settings are being saved.",
+          title: "Saving settings",
+        },
+        success: (result) => ({
+          description: result.successMessage ?? "Restaurant settings saved.",
+          title: "Settings saved",
+        }),
+      });
+      if (outcome.type === "result") {
+        setActionState(outcome.result);
+      } else {
+        setActionState({ formError: "Something went wrong. Please try again." });
+      }
+      if (outcome.type === "result" && outcome.result.status === "success") {
         clearSelectedLogo();
       }
       setIsSaving(false);
@@ -153,11 +168,6 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
         Set the bilingual restaurant identity and public-menu preferences.
       </p>
 
-      {actionState.status === "success" ? (
-        <p role="status" className="mt-5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
-          {actionState.successMessage}
-        </p>
-      ) : null}
       {actionState.warning ? (
         <p role="alert" className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-6">
           {actionState.warning}

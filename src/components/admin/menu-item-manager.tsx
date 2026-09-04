@@ -20,7 +20,6 @@ import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import {
-  Check,
   ChevronDown,
   GripVertical,
   ImagePlus,
@@ -39,7 +38,9 @@ import {
   toggleMenuItemAvailability,
   type MenuItemActionState,
 } from "@/app/(admin)/admin/items/actions";
+import { useAdminMutationToast } from "@/components/admin/admin-toast-provider";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import type {
   AdminMenuCategory,
   AdminMenuItem,
@@ -138,16 +139,6 @@ function SortableItem({
           <span className="font-medium text-muted-foreground">
             {item.price.toFixed(2)}
           </span>
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-xs font-medium",
-              item.available
-                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                : "bg-muted text-muted-foreground",
-            )}
-          >
-            {item.available ? "Available" : "Unavailable"}
-          </span>
         </div>
         <p
           dir="rtl"
@@ -157,22 +148,25 @@ function SortableItem({
           {item.nameAr}
         </p>
       </div>
-      <div className="flex flex-wrap items-center gap-1 sm:justify-end">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-pressed={item.available}
-          aria-label={`${item.available ? "Mark unavailable" : "Mark available"} ${item.nameEn}`}
-          disabled={isBusy}
-          onClick={() => onToggle(item)}
-        >
-          <Check
-            className={cn("size-3.5", !item.available && "opacity-35")}
-            aria-hidden="true"
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        <div className="flex min-h-8 items-center gap-2 px-1">
+          <span
+            className={cn(
+              "text-xs font-medium",
+              item.available
+                ? "text-emerald-700 dark:text-emerald-400"
+                : "text-muted-foreground",
+            )}
+          >
+            {item.available ? "Available" : "Unavailable"}
+          </span>
+          <Switch
+            checked={item.available}
+            aria-label={`${item.nameEn} availability on the public menu`}
+            disabled={isBusy}
+            onCheckedChange={() => onToggle(item)}
           />
-          {item.available ? "Available" : "Unavailable"}
-        </Button>
+        </div>
         <Button
           type="button"
           variant="ghost"
@@ -208,13 +202,13 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
   const [isToggling, setIsToggling] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<MenuItemActionState>({});
   const [deleteState, setDeleteState] = useState<MenuItemActionState>({});
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const { mutation } = useAdminMutationToast();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, {
@@ -264,7 +258,6 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
   }
 
   function openNewItem() {
-    setNotice(null);
     setWarning(null);
     reset(blankMenuItemValues);
     clearSelectedImage();
@@ -273,7 +266,6 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
   }
 
   function openEditItem(item: AdminMenuItem) {
-    setNotice(null);
     setWarning(null);
     reset({
       available: item.available,
@@ -323,11 +315,23 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
     setDeleteState({});
     setIsSaving(true);
     startTransition(async () => {
-      const result = await saveMenuItem({}, formData);
-      setSaveState(result);
-      if (result.status === "success") {
-        setNotice(result.successMessage ?? "Menu item saved.");
-        setWarning(result.warning ?? null);
+      const outcome = await mutation(saveMenuItem({}, formData), {
+        loading: {
+          description: "Your menu item is being saved.",
+          title: editingItem ? "Saving menu item" : "Creating menu item",
+        },
+        success: (result) => ({
+          description: result.successMessage ?? "Menu item saved.",
+          title: "Menu item saved",
+        }),
+      });
+      if (outcome.type === "result") {
+        setSaveState(outcome.result);
+      } else {
+        setSaveState({ formError: "Something went wrong. Please try again." });
+      }
+      if (outcome.type === "result" && outcome.result.status === "success") {
+        setWarning(outcome.result.warning ?? null);
         clearSelectedImage();
         setEditingItem(undefined);
       }
@@ -339,18 +343,29 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
     if (!window.confirm(`Delete “${item.nameEn}”? This cannot be undone.`)) {
       return;
     }
-    setNotice(null);
     setWarning(null);
     setDeleteState({});
     setIsDeleting(true);
     const formData = new FormData();
     formData.set("itemId", item.id);
     startTransition(async () => {
-      const result = await deleteMenuItem({}, formData);
-      setDeleteState(result);
-      if (result.status === "success") {
-        setNotice(result.successMessage ?? "Menu item deleted.");
-        setWarning(result.warning ?? null);
+      const outcome = await mutation(deleteMenuItem({}, formData), {
+        loading: {
+          description: "The menu item is being removed.",
+          title: "Deleting menu item",
+        },
+        success: (result) => ({
+          description: result.successMessage ?? "Menu item deleted.",
+          title: "Menu item deleted",
+        }),
+      });
+      if (outcome.type === "result") {
+        setDeleteState(outcome.result);
+      } else {
+        setDeleteState({ formError: "Something went wrong. Please try again." });
+      }
+      if (outcome.type === "result" && outcome.result.status === "success") {
+        setWarning(outcome.result.warning ?? null);
         clearSelectedImage();
         setEditingItem(undefined);
       }
@@ -361,7 +376,6 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
   function handleToggle(item: AdminMenuItem) {
     const previousAvailable = item.available;
     const nextAvailable = !previousAvailable;
-    setNotice(null);
     setWarning(null);
     setIsToggling(item.id);
     setOrderedItems((current) =>
@@ -372,8 +386,20 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
       ),
     );
     startTransition(async () => {
-      const result = await toggleMenuItemAvailability(item.id, nextAvailable);
-      if (result.status === "error") {
+      const outcome = await mutation(
+        toggleMenuItemAvailability(item.id, nextAvailable),
+        {
+          loading: {
+            description: "The public-menu availability is being updated.",
+            title: "Updating menu item",
+          },
+          success: (result) => ({
+            description: result.successMessage ?? "Menu item availability updated.",
+            title: "Menu item updated",
+          }),
+        },
+      );
+      if (outcome.type !== "result" || outcome.result.status === "error") {
         setOrderedItems((current) =>
           current.map((currentItem) =>
             currentItem.id === item.id
@@ -381,11 +407,6 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
               : currentItem,
           ),
         );
-        setNotice(
-          result.formError ?? "We couldn’t save that change. Please try again.",
-        );
-      } else {
-        setNotice(result.successMessage ?? "Menu item availability updated.");
       }
       setIsToggling(null);
     });
@@ -417,23 +438,28 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
         ? nextCategoryItems
         : nextItems.filter((item) => item.categoryId === category.id),
     );
-    setNotice(null);
     setWarning(null);
     setIsOrdering(categoryId);
     setOrderedItems(rebuiltItems);
     startTransition(async () => {
-      const result = await reorderMenuItems(
-        categoryId,
-        nextCategoryItems.map((item) => item.id),
+      const outcome = await mutation(
+        reorderMenuItems(
+          categoryId,
+          nextCategoryItems.map((item) => item.id),
+        ),
+        {
+          loading: {
+            description: "The menu item order is being saved.",
+            title: "Saving menu item order",
+          },
+          success: (result) => ({
+            description: result.successMessage ?? "Menu item order saved.",
+            title: "Menu item order saved",
+          }),
+        },
       );
-      if (result.status === "error") {
+      if (outcome.type !== "result" || outcome.result.status === "error") {
         setOrderedItems(previousItems);
-        setNotice(
-          result.formError ??
-            "We couldn’t save the menu item order. Please try again.",
-        );
-      } else {
-        setNotice(result.successMessage ?? "Menu item order saved.");
       }
       setIsOrdering(null);
     });
@@ -489,14 +515,6 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
           className="mt-5 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm leading-6 text-foreground"
         >
           Create a category before adding menu items.
-        </p>
-      ) : null}
-      {notice ? (
-        <p
-          role="status"
-          className="mt-5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground"
-        >
-          {notice}
         </p>
       ) : null}
       {warning ? (

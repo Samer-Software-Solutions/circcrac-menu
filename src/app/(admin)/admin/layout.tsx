@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { logout } from "@/app/admin/actions";
 import { fontVariables } from "@/app/fonts";
 import { AdminNavigation } from "@/components/admin/navigation";
+import { AdminToastProvider } from "@/components/admin/admin-toast-provider";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth/require-admin";
 
@@ -20,20 +21,34 @@ export default async function AdminLayout({ children }: { children: ReactNode })
 
   return (
     <html lang="en" dir="ltr" className={`${fontVariables} h-full antialiased`}>
-      <body className="min-h-full bg-muted/40 text-foreground">
-        <div className="min-h-dvh lg:grid lg:grid-cols-[15.5rem_minmax(0,1fr)]">
-          <aside className="hidden border-r bg-background lg:flex lg:flex-col">
-            <div className="flex h-16 items-center gap-2 border-b px-5 font-semibold">
-              <span className="grid size-8 place-items-center rounded-md bg-primary text-primary-foreground">
+      <body className="min-h-full bg-stone-50 text-foreground">
+        <AdminToastProvider>
+        <div className="min-h-dvh lg:grid lg:grid-cols-[16.5rem_minmax(0,1fr)]">
+          <aside className="hidden border-r border-stone-200/80 bg-stone-50/80 lg:flex lg:flex-col">
+            <div className="flex h-20 items-center border-b border-stone-200/80 px-5">
+              <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
                 <UtensilsCrossed className="size-4" aria-hidden="true" />
               </span>
-              CricCrac CMS
+              <div className="ms-3 min-w-0">
+                <p className="text-[0.68rem] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
+                  CricCrac
+                </p>
+                <p className="mt-0.5 text-sm font-semibold tracking-tight">Menu workspace</p>
+              </div>
             </div>
-            <div className="flex flex-1 flex-col px-3 py-5">
-              <AdminNavigation />
-              <div className="mt-auto border-t px-2 pt-4">
+            <div className="flex flex-1 flex-col px-3 py-6">
+              <p className="px-3 text-[0.68rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                Manage
+              </p>
+              <div className="mt-2">
+                <AdminNavigation />
+              </div>
+              <div className="mt-auto rounded-2xl border border-stone-200/80 bg-white/80 p-3 shadow-xs">
+                <p className="px-1 text-[0.68rem] font-semibold tracking-[0.14em] text-muted-foreground uppercase">
+                  Signed in as
+                </p>
                 <p className="truncate text-sm font-medium">{admin.email ?? "Administrator"}</p>
-                <form action={logout} className="mt-3">
+                <form action={logout} className="mt-2">
                   <Button type="submit" variant="ghost" className="w-full justify-start">
                     <LogOut aria-hidden="true" />
                     Sign out
@@ -44,10 +59,12 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           </aside>
 
           <div className="min-w-0">
-            <header className="border-b bg-background lg:hidden">
-              <div className="flex h-14 items-center justify-between gap-3 px-4">
-                <div className="flex min-w-0 items-center gap-2 font-semibold">
-                  <UtensilsCrossed className="size-4 shrink-0" aria-hidden="true" />
+            <header className="border-b border-stone-200/80 bg-stone-50/90 backdrop-blur lg:hidden">
+              <div className="flex h-16 items-center justify-between gap-3 px-4">
+                <div className="flex min-w-0 items-center gap-2.5 font-semibold">
+                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+                    <UtensilsCrossed className="size-4" aria-hidden="true" />
+                  </span>
                   <span className="truncate">CricCrac CMS</span>
                 </div>
                 <form action={logout}>
@@ -62,15 +79,16 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                   </Button>
                 </form>
               </div>
-              <div className="border-t px-2 pt-1">
+              <div className="border-t border-stone-200/80 px-2 pt-1">
                 <AdminNavigation compact />
               </div>
             </header>
-            <main className="mx-auto w-full max-w-6xl px-4 py-7 sm:px-6 sm:py-9 lg:px-10">
+            <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-12 lg:py-12">
               {children}
             </main>
           </div>
         </div>
+        </AdminToastProvider>
       </body>
     </html>
   );

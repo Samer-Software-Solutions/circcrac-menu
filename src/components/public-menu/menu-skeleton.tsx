@@ -8,7 +8,7 @@ export function MenuSkeleton({ loadingLabel }: MenuSkeletonProps) {
       <div
         role="status"
         aria-label={loadingLabel}
-        className="menu-shell min-h-dvh animate-pulse"
+        className="menu-shell min-h-dvh animate-pulse motion-reduce:animate-none"
       >
         <span className="sr-only">{loadingLabel}</span>
         <div className="menu-loading-header">

@@ -19,7 +19,6 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  Check,
   ChevronDown,
   GripVertical,
   LoaderCircle,
@@ -37,7 +36,9 @@ import {
   toggleCategoryEnabled,
   type CategoryActionState,
 } from "@/app/(admin)/admin/categories/actions";
+import { useAdminMutationToast } from "@/components/admin/admin-toast-provider";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import type { AdminCategory } from "@/lib/data/admin-categories";
 import {
   categoryFormSchema,
@@ -108,37 +109,35 @@ function SortableCategory({
       </button>
 
       <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-          <p className="truncate font-medium">{category.nameEn}</p>
-          <span
-            className={cn(
-              "rounded-full px-2 py-0.5 text-xs font-medium",
-              category.enabled
-                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
-                : "bg-muted text-muted-foreground",
-            )}
-          >
-            {category.enabled ? "Enabled" : "Disabled"}
-          </span>
-        </div>
-        <p dir="rtl" lang="ar" className="mt-1 truncate text-sm text-muted-foreground">
+        <p className="truncate font-medium">{category.nameEn}</p>
+        <p
+          dir="rtl"
+          lang="ar"
+          className="mt-1 truncate text-sm text-muted-foreground"
+        >
           {category.nameAr}
         </p>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1 sm:justify-end">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-pressed={category.enabled}
-          aria-label={`${category.enabled ? "Disable" : "Enable"} ${category.nameEn}`}
-          disabled={isBusy}
-          onClick={() => onToggle(category)}
-        >
-          <Check className={cn("size-3.5", !category.enabled && "opacity-35")} aria-hidden="true" />
-          {category.enabled ? "Enabled" : "Disabled"}
-        </Button>
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        <div className="flex min-h-8 items-center gap-2 px-1">
+          <span
+            className={cn(
+              "text-xs font-medium",
+              category.enabled
+                ? "text-emerald-700 dark:text-emerald-400"
+                : "text-muted-foreground",
+            )}
+          >
+            {category.enabled ? "Enabled" : "Disabled"}
+          </span>
+          <Switch
+            checked={category.enabled}
+            aria-label={`Show ${category.nameEn} on the public menu`}
+            disabled={isBusy}
+            onCheckedChange={() => onToggle(category)}
+          />
+        </div>
         <Button
           type="button"
           variant="ghost"
@@ -172,9 +171,9 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
   const [isToggling, setIsToggling] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [notice, setNotice] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<CategoryActionState>({});
   const [deleteState, setDeleteState] = useState<CategoryActionState>({});
+  const { mutation } = useAdminMutationToast();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -206,12 +205,10 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
   }, [editingCategory, reset]);
 
   function openNewCategory() {
-    setNotice(null);
     setEditingCategory(null);
   }
 
   function openEditCategory(category: AdminCategory) {
-    setNotice(null);
     setEditingCategory(category);
   }
 
@@ -233,11 +230,24 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
     setDeleteState({});
     setIsSaving(true);
     startTransition(async () => {
-      const result = await saveCategory({}, formData);
-      setSaveState(result);
+      const outcome = await mutation(saveCategory({}, formData), {
+        loading: {
+          description: "Your category is being saved.",
+          title: editingCategory ? "Saving category" : "Creating category",
+        },
+        success: (result) => ({
+          description: result.successMessage ?? "Category saved.",
+          title: "Category saved",
+        }),
+      });
 
-      if (result.status === "success") {
-        setNotice(result.successMessage ?? "Category saved.");
+      if (outcome.type === "result") {
+        setSaveState(outcome.result);
+      } else {
+        setSaveState({ formError: "Something went wrong. Please try again." });
+      }
+
+      if (outcome.type === "result" && outcome.result.status === "success") {
         setEditingCategory(undefined);
       }
 
@@ -254,17 +264,29 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       return;
     }
 
-    setNotice(null);
     setDeleteState({});
     setIsDeleting(true);
     const formData = new FormData();
     formData.set("categoryId", category.id);
     startTransition(async () => {
-      const result = await deleteCategory({}, formData);
-      setDeleteState(result);
+      const outcome = await mutation(deleteCategory({}, formData), {
+        loading: {
+          description: "The category is being removed.",
+          title: "Deleting category",
+        },
+        success: (result) => ({
+          description: result.successMessage ?? "Category deleted.",
+          title: "Category deleted",
+        }),
+      });
 
-      if (result.status === "success") {
-        setNotice(result.successMessage ?? "Category deleted.");
+      if (outcome.type === "result") {
+        setDeleteState(outcome.result);
+      } else {
+        setDeleteState({ formError: "Something went wrong. Please try again." });
+      }
+
+      if (outcome.type === "result" && outcome.result.status === "success") {
         setEditingCategory(undefined);
       }
 
@@ -276,7 +298,6 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
     const previousEnabled = category.enabled;
     const nextEnabled = !previousEnabled;
 
-    setNotice(null);
     setIsToggling(category.id);
     setOrderedCategories((current) =>
       current.map((currentCategory) =>
@@ -287,9 +308,21 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
     );
 
     startTransition(async () => {
-      const result = await toggleCategoryEnabled(category.id, nextEnabled);
+      const outcome = await mutation(
+        toggleCategoryEnabled(category.id, nextEnabled),
+        {
+          loading: {
+            description: "The public-menu visibility is being updated.",
+            title: "Updating category",
+          },
+          success: (result) => ({
+            description: result.successMessage ?? "Category visibility updated.",
+            title: "Category updated",
+          }),
+        },
+      );
 
-      if (result.status === "error") {
+      if (outcome.type !== "result" || outcome.result.status === "error") {
         setOrderedCategories((current) =>
           current.map((currentCategory) =>
             currentCategory.id === category.id
@@ -297,9 +330,6 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
               : currentCategory,
           ),
         );
-        setNotice(result.formError ?? "We couldn’t save that change. Please try again.");
-      } else {
-        setNotice(result.successMessage ?? "Category status updated.");
       }
 
       setIsToggling(null);
@@ -321,18 +351,26 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
     }
 
     const nextCategories = arrayMove(orderedCategories, oldIndex, newIndex);
-    setNotice(null);
     setIsOrdering(true);
     setOrderedCategories(nextCategories);
 
     startTransition(async () => {
-      const result = await reorderCategories(nextCategories.map((category) => category.id));
+      const outcome = await mutation(
+        reorderCategories(nextCategories.map((category) => category.id)),
+        {
+          loading: {
+            description: "The category display order is being saved.",
+            title: "Saving category order",
+          },
+          success: (result) => ({
+            description: result.successMessage ?? "Category order saved.",
+            title: "Category order saved",
+          }),
+        },
+      );
 
-      if (result.status === "error") {
+      if (outcome.type !== "result" || outcome.result.status === "error") {
         setOrderedCategories(categories);
-        setNotice(result.formError ?? "We couldn’t save the category order. Please try again.");
-      } else {
-        setNotice(result.successMessage ?? "Category order saved.");
       }
 
       setIsOrdering(false);
@@ -361,14 +399,6 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
         </Button>
       </div>
 
-      {notice ? (
-        <p
-          role="status"
-          className="mt-5 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-foreground"
-        >
-          {notice}
-        </p>
-      ) : null}
       {saveState.formError ? (
         <p role="alert" className="mt-5 rounded-xl border border-destructive/25 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {saveState.formError}
