@@ -39,6 +39,15 @@ import {
   type MenuItemActionState,
 } from "@/app/(admin)/admin/items/actions";
 import { useAdminMutationToast } from "@/components/admin/admin-toast-provider";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import type {
@@ -202,6 +211,7 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
   const [isToggling, setIsToggling] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<AdminMenuItem | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
   const [saveState, setSaveState] = useState<MenuItemActionState>({});
   const [deleteState, setDeleteState] = useState<MenuItemActionState>({});
@@ -339,15 +349,16 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
     });
   }
 
-  function handleDelete(item: AdminMenuItem) {
-    if (!window.confirm(`Delete “${item.nameEn}”? This cannot be undone.`)) {
+  function confirmDeleteItem() {
+    if (!itemToDelete) {
       return;
     }
+
     setWarning(null);
     setDeleteState({});
     setIsDeleting(true);
     const formData = new FormData();
-    formData.set("itemId", item.id);
+    formData.set("itemId", itemToDelete.id);
     startTransition(async () => {
       const outcome = await mutation(deleteMenuItem({}, formData), {
         loading: {
@@ -368,6 +379,7 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
         setWarning(outcome.result.warning ?? null);
         clearSelectedImage();
         setEditingItem(undefined);
+        setItemToDelete(null);
       }
       setIsDeleting(false);
     });
@@ -901,7 +913,7 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
                             key={item.id}
                             item={item}
                             isBusy={isBusy}
-                            onDelete={handleDelete}
+                            onDelete={setItemToDelete}
                             onEdit={openEditItem}
                             onToggle={handleToggle}
                           />
@@ -915,6 +927,41 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
           );
         })}
       </div>
+
+      <AlertDialog
+        open={itemToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) {
+            setItemToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold tracking-tight">
+              Delete “{itemToDelete?.nameEn}”?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-6 text-muted-foreground">
+              This permanently deletes the menu item. Its associated image will
+              be cleaned up when it is no longer used elsewhere.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={confirmDeleteItem}
+            >
+              {isDeleting ? (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              ) : null}
+              {isDeleting ? "Deleting…" : "Delete menu item"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }

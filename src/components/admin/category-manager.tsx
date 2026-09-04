@@ -37,6 +37,15 @@ import {
   type CategoryActionState,
 } from "@/app/(admin)/admin/categories/actions";
 import { useAdminMutationToast } from "@/components/admin/admin-toast-provider";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import type { AdminCategory } from "@/lib/data/admin-categories";
@@ -171,6 +180,8 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
   const [isToggling, setIsToggling] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] =
+    useState<AdminCategory | null>(null);
   const [saveState, setSaveState] = useState<CategoryActionState>({});
   const [deleteState, setDeleteState] = useState<CategoryActionState>({});
   const { mutation } = useAdminMutationToast();
@@ -255,19 +266,15 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
     });
   }
 
-  function handleDelete(category: AdminCategory) {
-    const confirmed = window.confirm(
-      `Delete “${category.nameEn}”? Categories with menu items cannot be deleted.`,
-    );
-
-    if (!confirmed) {
+  function confirmDeleteCategory() {
+    if (!categoryToDelete) {
       return;
     }
 
     setDeleteState({});
     setIsDeleting(true);
     const formData = new FormData();
-    formData.set("categoryId", category.id);
+    formData.set("categoryId", categoryToDelete.id);
     startTransition(async () => {
       const outcome = await mutation(deleteCategory({}, formData), {
         loading: {
@@ -288,6 +295,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
 
       if (outcome.type === "result" && outcome.result.status === "success") {
         setEditingCategory(undefined);
+        setCategoryToDelete(null);
       }
 
       setIsDeleting(false);
@@ -518,7 +526,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
                       key={category.id}
                       category={category}
                       isBusy={isBusy}
-                      onDelete={handleDelete}
+                      onDelete={setCategoryToDelete}
                       onEdit={openEditCategory}
                       onToggle={handleToggle}
                     />
@@ -532,6 +540,41 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
           </>
         )}
       </div>
+
+      <AlertDialog
+        open={categoryToDelete !== null}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) {
+            setCategoryToDelete(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-lg font-semibold tracking-tight">
+              Delete “{categoryToDelete?.nameEn}”?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm leading-6 text-muted-foreground">
+              This category will be permanently removed. Categories with menu
+              items cannot be deleted; move or delete their items first.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={isDeleting}
+              onClick={confirmDeleteCategory}
+            >
+              {isDeleting ? (
+                <LoaderCircle className="animate-spin" aria-hidden="true" />
+              ) : null}
+              {isDeleting ? "Deleting…" : "Delete category"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
