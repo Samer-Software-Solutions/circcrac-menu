@@ -26,6 +26,7 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { startTransition, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 
@@ -185,6 +186,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
   const [saveState, setSaveState] = useState<CategoryActionState>({});
   const [deleteState, setDeleteState] = useState<CategoryActionState>({});
   const { mutation } = useAdminMutationToast();
+  const router = useRouter();
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -260,6 +262,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
 
       if (outcome.type === "result" && outcome.result.status === "success") {
         setEditingCategory(undefined);
+        router.refresh();
       }
 
       setIsSaving(false);
@@ -296,6 +299,7 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
       if (outcome.type === "result" && outcome.result.status === "success") {
         setEditingCategory(undefined);
         setCategoryToDelete(null);
+        router.refresh();
       }
 
       setIsDeleting(false);
@@ -338,6 +342,8 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
               : currentCategory,
           ),
         );
+      } else {
+        router.refresh();
       }
 
       setIsToggling(null);
@@ -379,6 +385,8 @@ export function CategoryManager({ categories }: CategoryManagerProps) {
 
       if (outcome.type !== "result" || outcome.result.status === "error") {
         setOrderedCategories(categories);
+      } else {
+        router.refresh();
       }
 
       setIsOrdering(false);
