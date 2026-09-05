@@ -1,30 +1,31 @@
 import type { Locale } from "next-intl";
 import Image from "next/image";
 
-import { LanguageSwitch } from "@/components/language-switch";
+import {
+  LanguageSwitch,
+  type LanguageSwitchLabels,
+} from "@/components/language-switch";
 
 type MenuHeroProps = {
   currentLocale: Locale;
   heroImages: string[];
+  languageSwitchLabels: LanguageSwitchLabels;
   logoAlt: string;
   logoUrl: string | null;
   monogram: string;
   restaurantName: string;
   subtitle: string | null;
-  switchLanguageAccessibleLabel: string;
-  switchLanguageLabel: string;
 };
 
 export function MenuHero({
   currentLocale,
   heroImages,
+  languageSwitchLabels,
   logoAlt,
   logoUrl,
   monogram,
   restaurantName,
   subtitle,
-  switchLanguageAccessibleLabel,
-  switchLanguageLabel,
 }: MenuHeroProps) {
   const collageImages = heroImages.slice(0, 3);
 
@@ -62,8 +63,7 @@ export function MenuHero({
         <div className="menu-hero-lang">
           <LanguageSwitch
             currentLocale={currentLocale}
-            label={switchLanguageLabel}
-            accessibleLabel={switchLanguageAccessibleLabel}
+            {...languageSwitchLabels}
           />
         </div>
       </div>

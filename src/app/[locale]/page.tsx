@@ -5,7 +5,10 @@ import { hasLocale } from "next-intl";
 import { getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 
-import { LanguageSwitch } from "@/components/language-switch";
+import {
+  LanguageSwitch,
+  type LanguageSwitchLabels,
+} from "@/components/language-switch";
 import {
   CategoryNavigation,
   type CategoryNavigationItem,
@@ -68,6 +71,14 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
     getTranslations({ locale, namespace: "PublicMenu" }),
   ]);
 
+  const languageSwitchLabels: LanguageSwitchLabels = {
+    languageMenuLabel: t("languageMenuLabel"),
+    englishLanguageName: t("englishLanguageName"),
+    arabicLanguageName: t("arabicLanguageName"),
+    viewMenuInEnglishLabel: t("viewMenuInEnglishLabel"),
+    viewMenuInArabicLabel: t("viewMenuInArabicLabel"),
+  };
+
   if (menuResult.status === "error") {
     return (
       <main
@@ -79,11 +90,7 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
             <span className="menu-monogram" aria-hidden="true">
               CC
             </span>
-            <LanguageSwitch
-              currentLocale={locale}
-              label={t("switchLanguage")}
-              accessibleLabel={t("switchLanguageLabel")}
-            />
+            <LanguageSwitch currentLocale={locale} {...languageSwitchLabels} />
           </header>
           <section className="my-auto max-w-lg py-20">
             <p className="menu-eyebrow">{t("menuLabel")}</p>
@@ -133,13 +140,12 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
       <MenuHero
         currentLocale={locale}
         heroImages={heroImages}
+        languageSwitchLabels={languageSwitchLabels}
         logoAlt={t("logoAlt", { restaurantName })}
         logoUrl={settings.logoUrl}
         monogram={getMonogram(restaurantName)}
         restaurantName={restaurantName}
         subtitle={heroSubtitle}
-        switchLanguageAccessibleLabel={t("switchLanguageLabel")}
-        switchLanguageLabel={t("switchLanguage")}
       />
 
       <div className="menu-shell">
@@ -148,6 +154,8 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
             ariaLabel={t("categoryNavigationLabel")}
             categories={navigationCategories}
             closeQuickJumpLabel={t("closeQuickJump")}
+            currentLocale={locale}
+            languageSwitchLabels={languageSwitchLabels}
             openQuickJumpLabel={t("openQuickJump")}
             quickJumpTitle={t("quickJumpTitle")}
           />

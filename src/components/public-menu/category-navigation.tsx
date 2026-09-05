@@ -2,7 +2,15 @@
 
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import { Menu, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import type { Locale } from "next-intl";
+import { useEffect, useRef, useState } from "react";
+
+import {
+  LanguageSwitch,
+  type LanguageSwitchLabels,
+} from "@/components/language-switch";
+
+const SCROLL_RESTORE_KEY = "menu-scroll-category";
 
 export type CategoryNavigationItem = {
   id: string;
@@ -13,6 +21,8 @@ type CategoryNavigationProps = {
   ariaLabel: string;
   categories: CategoryNavigationItem[];
   closeQuickJumpLabel: string;
+  currentLocale: Locale;
+  languageSwitchLabels: LanguageSwitchLabels;
   openQuickJumpLabel: string;
   quickJumpTitle: string;
 };
@@ -25,6 +35,8 @@ export function CategoryNavigation({
   ariaLabel,
   categories,
   closeQuickJumpLabel,
+  currentLocale,
+  languageSwitchLabels,
   openQuickJumpLabel,
   quickJumpTitle,
 }: CategoryNavigationProps) {
@@ -32,6 +44,74 @@ export function CategoryNavigation({
     categories[0]?.id ?? null,
   );
   const [isQuickJumpOpen, setIsQuickJumpOpen] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const linkRefs = useRef(new Map<string, HTMLAnchorElement>());
+
+  // Restore the section the user was reading before a language switch
+  // (or any other reload) instead of dropping them back at the top.
+  useEffect(() => {
+    let restoreId: string | null = null;
+    try {
+      restoreId = sessionStorage.getItem(SCROLL_RESTORE_KEY);
+      sessionStorage.removeItem(SCROLL_RESTORE_KEY);
+    } catch {
+      restoreId = null;
+    }
+
+    if (!restoreId) {
+      return;
+    }
+
+    const target = document.getElementById(restoreId);
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({ behavior: "auto", block: "start" });
+    setActiveCategory(restoreId.replace(/^category-/, ""));
+  }, []);
+
+  // Keep the pill bar's active tab in view as the highlighted category
+  // changes, whether from a click or from scrolling the page.
+  useEffect(() => {
+    if (!activeCategory) {
+      return;
+    }
+
+    const container = scrollContainerRef.current;
+    const activeLink = linkRefs.current.get(activeCategory);
+    if (!container || !activeLink) {
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    const behavior = prefersReducedMotion ? "auto" : "smooth";
+
+    // Let the first/last pill settle at its natural edge instead of being
+    // dragged toward the center, which reads as a clunky overcorrection.
+    const isFirst = categories[0]?.id === activeCategory;
+    const isLast = categories[categories.length - 1]?.id === activeCategory;
+
+    if (isFirst || isLast) {
+      activeLink.scrollIntoView({
+        behavior,
+        block: "nearest",
+        inline: isFirst ? "start" : "end",
+      });
+      return;
+    }
+
+    const containerRect = container.getBoundingClientRect();
+    const linkRect = activeLink.getBoundingClientRect();
+    const offset =
+      linkRect.left -
+      containerRect.left -
+      (containerRect.width - linkRect.width) / 2;
+
+    container.scrollBy({ left: offset, behavior });
+  }, [activeCategory, categories]);
 
   useEffect(() => {
     const sections = categories
@@ -137,13 +217,20 @@ export function CategoryNavigation({
           </DialogPrimitive.Portal>
         </DialogPrimitive.Root>
 
-        <div className="menu-category-scroll">
+        <div className="menu-category-scroll" ref={scrollContainerRef}>
           {categories.map((category) => {
             const isActive = activeCategory === category.id;
 
             return (
               <a
                 key={category.id}
+                ref={(node) => {
+                  if (node) {
+                    linkRefs.current.set(category.id, node);
+                  } else {
+                    linkRefs.current.delete(category.id);
+                  }
+                }}
                 href={`#${categorySectionId(category.id)}`}
                 aria-current={isActive ? "location" : undefined}
                 className="menu-category-link"
@@ -157,6 +244,8 @@ export function CategoryNavigation({
             );
           })}
         </div>
+
+        <LanguageSwitch currentLocale={currentLocale} {...languageSwitchLabels} />
       </div>
     </nav>
   );

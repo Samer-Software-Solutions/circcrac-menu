@@ -19,8 +19,11 @@
     "errorTitle": "We couldn't load the menu",
     "errorDescription": "Please refresh the page or try again in a few moments.",
     "loadingLabel": "Loading menu",
-    "switchLanguage": "العربية",
-    "switchLanguageLabel": "View the menu in Arabic"
+    "languageMenuLabel": "Choose language",
+    "englishLanguageName": "English",
+    "arabicLanguageName": "العربية",
+    "viewMenuInEnglishLabel": "View the menu in English",
+    "viewMenuInArabicLabel": "View the menu in Arabic"
   },
   "NotFoundPage": {
     "title": "Page not found",

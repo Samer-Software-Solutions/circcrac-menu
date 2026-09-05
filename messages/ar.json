@@ -19,8 +19,11 @@
     "errorTitle": "تعذر تحميل القائمة",
     "errorDescription": "يرجى تحديث الصفحة أو المحاولة مرة أخرى بعد قليل.",
     "loadingLabel": "جارٍ تحميل القائمة",
-    "switchLanguage": "English",
-    "switchLanguageLabel": "عرض القائمة باللغة الإنجليزية"
+    "languageMenuLabel": "اختر اللغة",
+    "englishLanguageName": "English",
+    "arabicLanguageName": "العربية",
+    "viewMenuInEnglishLabel": "عرض القائمة بالإنجليزية",
+    "viewMenuInArabicLabel": "عرض القائمة بالعربية"
   },
   "NotFoundPage": {
     "title": "الصفحة غير موجودة",
