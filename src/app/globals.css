@@ -150,6 +150,7 @@ html[lang="ar"] {
     justify-content: space-between;
     gap: 1rem;
     padding-block: 1.25rem;
+    padding-top: max(1.25rem, calc(env(safe-area-inset-top) + 0.75rem));
   }
 
   .menu-logo-frame,
@@ -268,7 +269,7 @@ html[lang="ar"] {
   .menu-hero-lang {
     position: absolute;
     z-index: 2;
-    top: 1rem;
+    top: max(1rem, calc(env(safe-area-inset-top) + 0.5rem));
     inset-inline-end: 1rem;
   }
 

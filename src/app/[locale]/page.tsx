@@ -163,7 +163,7 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
             </p>
           </section>
         ) : (
-          <div className="pb-20 sm:pb-28">
+          <div className="pb-[max(5rem,calc(env(safe-area-inset-bottom)+5rem))] sm:pb-[max(7rem,calc(env(safe-area-inset-bottom)+7rem))]">
             {categories.map((category, categoryIndex) => {
               const categoryName = getLocalizedValue(
                 locale,
