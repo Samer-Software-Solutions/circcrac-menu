@@ -40,7 +40,13 @@ export default async function QrCodePage() {
 
   return (
     <QrCodeManager
-      logoUrl={settingsResult.settings.logoUrl}
+      backgroundColor={settingsResult.settings.qrBackgroundColor}
+      cornerDotType={settingsResult.settings.qrCornerDotType}
+      cornerSquareType={settingsResult.settings.qrCornerSquareType}
+      dotColor={settingsResult.settings.qrDotColor}
+      dotType={settingsResult.settings.qrDotType}
+      logoSize={settingsResult.settings.qrLogoSize}
+      logoUrl={settingsResult.settings.qrLogoUrl}
       publicUrl={getCanonicalPublicMenuUrl(originFromRequestHeaders(requestHeaders))}
       restaurantName={settingsResult.settings.restaurantNameEn}
     />

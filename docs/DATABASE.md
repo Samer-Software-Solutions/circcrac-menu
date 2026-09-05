@@ -68,6 +68,13 @@ Table: `public.settings`
 | `currency` | `text` | Required three-letter uppercase code; defaults to `QAR` |
 | `primary_color` | `text` | Optional `#RRGGBB` color |
 | `default_language` | `text` | Required; `en` or `ar`; defaults to `en` |
+| `qr_dot_color` | `text` | Required `#RRGGBB` color; defaults to `#E0332D`. Color of the QR code's dots |
+| `qr_background_color` | `text` | Required `#RRGGBB` color; defaults to `#242021`. Color behind the QR code's dots |
+| `qr_logo_path` | `text` | Optional; non-blank when present. Logo overlaid on the QR code, independent of `logo_path` |
+| `qr_dot_type` | `text` | Required; one of `dots`, `rounded`, `classy`, `classy-rounded`, `square`, `extra-rounded`; defaults to `square` |
+| `qr_corner_square_type` | `text` | Required; one of `dot`, `dots`, `rounded`, `classy`, `classy-rounded`, `square`, `extra-rounded`; defaults to `square` |
+| `qr_corner_dot_type` | `text` | Required; one of `dot`, `dots`, `rounded`, `classy`, `classy-rounded`, `square`, `extra-rounded`; defaults to `square` |
+| `qr_logo_size` | `numeric(3,2)` | Required; between `0.10` and `0.50`; defaults to `0.30`. Logo size as a fraction of the QR code's width |
 | `updated_at` | `timestamptz` | Required; defaults to `now()`; updated by trigger |
 
 A unique index on the constant expression `true` allows at most one settings

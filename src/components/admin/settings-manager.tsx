@@ -298,7 +298,7 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
 
         <fieldset className="border-t pt-6">
           <legend className="text-base font-semibold">Logo</legend>
-          <p className="mt-1 text-sm leading-6 text-muted-foreground">JPEG, PNG, WebP, or AVIF up to 5 MiB. The logo appears on the public menu and QR code.</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">JPEG, PNG, WebP, or AVIF up to 5 MiB. The logo appears on the public menu. The QR code has its own separate logo, set on the QR code page.</p>
           <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative grid size-28 shrink-0 place-items-center overflow-hidden rounded-xl border bg-muted">
               {displayedLogo ? <Image src={displayedLogo} alt="Current restaurant logo preview" fill sizes="112px" className="object-contain p-2" /> : <ImagePlus className="size-7 text-muted-foreground" aria-hidden="true" />}
