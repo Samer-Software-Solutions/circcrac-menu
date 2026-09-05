@@ -14,6 +14,8 @@ export type AdminSettings = {
   primaryColor: string | null;
   restaurantNameAr: string;
   restaurantNameEn: string;
+  taglineAr: string | null;
+  taglineEn: string | null;
   updatedAt: string;
 };
 
@@ -29,7 +31,7 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
   const { data, error } = await supabase
     .from("settings")
     .select(
-      "banner_path, currency, default_language, id, logo_path, primary_color, restaurant_name_ar, restaurant_name_en, updated_at",
+      "banner_path, currency, default_language, id, logo_path, primary_color, restaurant_name_ar, restaurant_name_en, tagline_ar, tagline_en, updated_at",
     )
     .limit(1)
     .maybeSingle();
@@ -60,6 +62,8 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
       primaryColor: data.primary_color,
       restaurantNameAr: data.restaurant_name_ar,
       restaurantNameEn: data.restaurant_name_en,
+      taglineAr: data.tagline_ar,
+      taglineEn: data.tagline_en,
       updatedAt: data.updated_at,
     },
     status: "ready",

@@ -102,6 +102,8 @@ export type Database = {
           primary_color: string | null;
           restaurant_name_ar: string;
           restaurant_name_en: string;
+          tagline_ar: string | null;
+          tagline_en: string | null;
           updated_at: string;
         };
         Insert: {
@@ -113,6 +115,8 @@ export type Database = {
           primary_color?: string | null;
           restaurant_name_ar: string;
           restaurant_name_en: string;
+          tagline_ar?: string | null;
+          tagline_en?: string | null;
           updated_at?: string;
         };
         Update: {
@@ -124,6 +128,8 @@ export type Database = {
           primary_color?: string | null;
           restaurant_name_ar?: string;
           restaurant_name_en?: string;
+          tagline_ar?: string | null;
+          tagline_en?: string | null;
           updated_at?: string;
         };
         Relationships: [];

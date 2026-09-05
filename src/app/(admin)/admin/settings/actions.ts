@@ -17,6 +17,8 @@ export type SettingsActionState = {
     primaryColor?: string[];
     restaurantNameAr?: string[];
     restaurantNameEn?: string[];
+    taglineAr?: string[];
+    taglineEn?: string[];
   };
   formError?: string;
   status?: "success";
@@ -137,6 +139,8 @@ export async function saveSettings(
     removeLogo: formData.get("removeLogo"),
     restaurantNameAr: formData.get("restaurantNameAr"),
     restaurantNameEn: formData.get("restaurantNameEn"),
+    taglineAr: formData.get("taglineAr"),
+    taglineEn: formData.get("taglineEn"),
   });
   if (!parsedValues.success) {
     return { fieldErrors: parsedValues.error.flatten().fieldErrors };
@@ -202,6 +206,8 @@ export async function saveSettings(
       primary_color: parsedValues.data.primaryColor,
       restaurant_name_ar: parsedValues.data.restaurantNameAr,
       restaurant_name_en: parsedValues.data.restaurantNameEn,
+      tagline_ar: parsedValues.data.taglineAr,
+      tagline_en: parsedValues.data.taglineEn,
     })
     .eq("id", existingSettings.id)
     .select("id")

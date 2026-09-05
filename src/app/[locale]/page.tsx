@@ -122,10 +122,11 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
   const menuStyle: MenuBrandStyle = {
     "--menu-brand": settings.primaryColor ?? DEFAULT_MENU_BRAND_COLOR,
   };
-  const heroSubtitle =
-    navigationCategories.length > 0
-      ? navigationCategories.map((category) => category.label).join(" · ")
-      : null;
+  const heroSubtitle = getLocalizedValue(
+    locale,
+    settings.taglineEn ?? "",
+    settings.taglineAr ?? "",
+  ) || null;
 
   return (
     <main

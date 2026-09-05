@@ -61,6 +61,8 @@ Table: `public.settings`
 | `id` | `uuid` | Primary key; defaults to `gen_random_uuid()` |
 | `restaurant_name_en` | `text` | Required and non-blank |
 | `restaurant_name_ar` | `text` | Required and non-blank |
+| `tagline_en` | `text` | Optional; non-blank when present. Shown under the restaurant name on the public menu hero |
+| `tagline_ar` | `text` | Optional; non-blank when present. Shown under the restaurant name on the public menu hero |
 | `logo_path` | `text` | Optional; non-blank when present |
 | `banner_path` | `text` | Optional; non-blank when present |
 | `currency` | `text` | Required three-letter uppercase code; defaults to `QAR` |

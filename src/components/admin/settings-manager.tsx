@@ -35,6 +35,8 @@ function valuesFor(settings: AdminSettings): SettingsFormValues {
     removeLogo: false,
     restaurantNameAr: settings.restaurantNameAr,
     restaurantNameEn: settings.restaurantNameEn,
+    taglineAr: settings.taglineAr ?? "",
+    taglineEn: settings.taglineEn ?? "",
   };
 }
 
@@ -164,6 +166,8 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     formData.set("removeBanner", String(values.removeBanner));
     formData.set("restaurantNameAr", values.restaurantNameAr);
     formData.set("restaurantNameEn", values.restaurantNameEn);
+    formData.set("taglineAr", values.taglineAr);
+    formData.set("taglineEn", values.taglineEn);
     if (values.logo) {
       formData.set("logo", values.logo);
     }
@@ -203,7 +207,9 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
       | "defaultLanguage"
       | "primaryColor"
       | "restaurantNameAr"
-      | "restaurantNameEn",
+      | "restaurantNameEn"
+      | "taglineAr"
+      | "taglineEn",
   ) => errors[name]?.message ?? firstError(actionState.fieldErrors?.[name]);
   const displayedLogo = previewUrl ?? (removeLogo ? null : settings.logoUrl);
   const displayedBanner =
@@ -259,6 +265,34 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
               className="h-10 w-full rounded-lg border bg-background px-3 text-right shadow-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
             />
             {fieldError("restaurantNameAr") ? <p id="restaurant-name-ar-error" className="text-sm text-destructive">{fieldError("restaurantNameAr")}</p> : null}
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="restaurant-tagline-en" className="text-sm font-medium">English tagline <span className="font-normal text-muted-foreground">(optional)</span></label>
+            <input
+              {...register("taglineEn")}
+              id="restaurant-tagline-en"
+              autoComplete="off"
+              aria-describedby={fieldError("taglineEn") ? "restaurant-tagline-en-error" : "restaurant-tagline-en-help"}
+              aria-invalid={Boolean(fieldError("taglineEn"))}
+              className="h-10 w-full rounded-lg border bg-background px-3 text-sm shadow-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+              placeholder="e.g. Modern Levantine kitchen"
+            />
+            {fieldError("taglineEn") ? <p id="restaurant-tagline-en-error" className="text-sm text-destructive">{fieldError("taglineEn")}</p> : <p id="restaurant-tagline-en-help" className="text-xs text-muted-foreground">Shown under the restaurant name on the public menu.</p>}
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="restaurant-tagline-ar" className="text-sm font-medium">Arabic tagline <span className="font-normal text-muted-foreground">(optional)</span></label>
+            <input
+              {...register("taglineAr")}
+              id="restaurant-tagline-ar"
+              dir="rtl"
+              lang="ar"
+              autoComplete="off"
+              aria-describedby={fieldError("taglineAr") ? "restaurant-tagline-ar-error" : "restaurant-tagline-ar-help"}
+              aria-invalid={Boolean(fieldError("taglineAr"))}
+              className="h-10 w-full rounded-lg border bg-background px-3 text-right text-sm shadow-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+              placeholder="مثال: مطبخ شامي عصري"
+            />
+            {fieldError("taglineAr") ? <p id="restaurant-tagline-ar-error" className="text-sm text-destructive">{fieldError("taglineAr")}</p> : <p id="restaurant-tagline-ar-help" className="text-xs text-muted-foreground">تظهر تحت اسم المطعم في القائمة العامة.</p>}
           </div>
         </fieldset>
 

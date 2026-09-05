@@ -15,6 +15,8 @@ type PublicMenuSettings = {
   primaryColor: string | null;
   restaurantNameAr: string;
   restaurantNameEn: string;
+  taglineAr: string | null;
+  taglineEn: string | null;
 };
 
 export type PublicMenuItem = {
@@ -57,7 +59,7 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
     supabase
       .from("settings")
       .select(
-        "banner_path, currency, default_language, logo_path, primary_color, restaurant_name_ar, restaurant_name_en",
+        "banner_path, currency, default_language, logo_path, primary_color, restaurant_name_ar, restaurant_name_en, tagline_ar, tagline_en",
       )
       .limit(1)
       .maybeSingle(),
@@ -134,6 +136,8 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
       primaryColor: settingsResult.data.primary_color,
       restaurantNameAr: settingsResult.data.restaurant_name_ar,
       restaurantNameEn: settingsResult.data.restaurant_name_en,
+      taglineAr: settingsResult.data.tagline_ar,
+      taglineEn: settingsResult.data.tagline_en,
     },
     categories: categories.map((category) => ({
       id: category.id,

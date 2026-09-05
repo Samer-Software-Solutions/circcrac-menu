@@ -8,6 +8,11 @@ const restaurantNameSchema = z
   .min(1, "This field is required.")
   .max(160, "Use 160 characters or fewer.");
 
+const taglineSchema = z
+  .string()
+  .trim()
+  .max(160, "Use 160 characters or fewer.");
+
 const currencySchema = z
   .string()
   .regex(/^[A-Z]{3}$/, "Enter a three-letter uppercase currency code.");
@@ -26,6 +31,8 @@ export const settingsFormSchema = z.object({
   removeLogo: z.boolean(),
   restaurantNameAr: restaurantNameSchema,
   restaurantNameEn: restaurantNameSchema,
+  taglineAr: taglineSchema.nullable(),
+  taglineEn: taglineSchema.nullable(),
 });
 
 export const settingsFormDataSchema = settingsFormSchema.extend({
@@ -36,6 +43,16 @@ export const settingsFormDataSchema = settingsFormSchema.extend({
     .pipe(primaryColorSchema.nullable()),
   removeBanner: z.enum(["true", "false"]).transform((value) => value === "true"),
   removeLogo: z.enum(["true", "false"]).transform((value) => value === "true"),
+  taglineAr: z
+    .string()
+    .trim()
+    .transform((value) => (value === "" ? null : value))
+    .pipe(taglineSchema.nullable()),
+  taglineEn: z
+    .string()
+    .trim()
+    .transform((value) => (value === "" ? null : value))
+    .pipe(taglineSchema.nullable()),
 });
 
 export const settingsClientFormSchema = z.object({
@@ -54,6 +71,8 @@ export const settingsClientFormSchema = z.object({
   removeLogo: z.boolean(),
   restaurantNameAr: restaurantNameSchema,
   restaurantNameEn: restaurantNameSchema,
+  taglineAr: taglineSchema,
+  taglineEn: taglineSchema,
   banner: menuImageSchema,
   logo: menuImageSchema,
 });
