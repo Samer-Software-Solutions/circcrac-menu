@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LogOut, UtensilsCrossed } from "lucide-react";
+import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { logout } from "@/app/admin/actions";
@@ -8,6 +9,7 @@ import { AdminNavigation } from "@/components/admin/navigation";
 import { AdminToastProvider } from "@/components/admin/admin-toast-provider";
 import { Button } from "@/components/ui/button";
 import { requireAdmin } from "@/lib/auth/require-admin";
+import { getAdminSettings } from "@/lib/data/admin-settings";
 
 import "../../globals.css";
 
@@ -18,6 +20,8 @@ export const metadata: Metadata = {
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const admin = await requireAdmin();
+  const settingsResult = await getAdminSettings();
+  const logoUrl = settingsResult.status === "ready" ? settingsResult.settings.logoUrl : null;
 
   return (
     <html lang="en" dir="ltr" className={`${fontVariables} h-full antialiased`}>
@@ -26,8 +30,20 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <div className="min-h-dvh lg:grid lg:grid-cols-[16.5rem_minmax(0,1fr)]">
           <aside className="hidden border-r border-stone-200/80 bg-stone-50/80 lg:flex lg:flex-col">
             <div className="flex h-20 items-center border-b border-stone-200/80 px-5">
-              <span className="grid size-10 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-                <UtensilsCrossed className="size-4" aria-hidden="true" />
+              <span className="grid size-10 place-items-center overflow-hidden rounded-xl bg-primary text-primary-foreground shadow-sm">
+                {logoUrl ? (
+                  <Image
+                    src={logoUrl}
+                    alt=""
+                    width={40}
+                    height={40}
+                    sizes="40px"
+                    className="size-full object-cover"
+                    priority
+                  />
+                ) : (
+                  <UtensilsCrossed className="size-4" aria-hidden="true" />
+                )}
               </span>
               <div className="ms-3 min-w-0">
                 <p className="text-[0.68rem] font-semibold tracking-[0.16em] text-muted-foreground uppercase">
@@ -62,8 +78,19 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <header className="border-b border-stone-200/80 bg-stone-50/90 backdrop-blur lg:hidden">
               <div className="flex h-16 items-center justify-between gap-3 px-4">
                 <div className="flex min-w-0 items-center gap-2.5 font-semibold">
-                  <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
-                    <UtensilsCrossed className="size-4" aria-hidden="true" />
+                  <span className="grid size-8 shrink-0 place-items-center overflow-hidden rounded-lg bg-primary text-primary-foreground">
+                    {logoUrl ? (
+                      <Image
+                        src={logoUrl}
+                        alt=""
+                        width={32}
+                        height={32}
+                        sizes="32px"
+                        className="size-full object-cover"
+                      />
+                    ) : (
+                      <UtensilsCrossed className="size-4" aria-hidden="true" />
+                    )}
                   </span>
                   <span className="truncate">CricCrac CMS</span>
                 </div>

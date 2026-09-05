@@ -33,8 +33,8 @@ type QrCodeManagerProps = {
 const PREVIEW_SIZE = 232;
 const OUTPUT_SIZE = 2048;
 // A generous quiet zone keeps the code scannable once printed small.
-const MARGIN_RATIO = 0.05;
-const LOGO_MARGIN_RATIO = 0.012;
+const MARGIN_RATIO = 0.02;
+const LOGO_MARGIN_RATIO = 0.00;
 const HEX_COLOR_PATTERN = /^#[0-9A-Fa-f]{6}$/;
 
 const dotTypeLabels: Record<(typeof qrDotTypeValues)[number], string> = {
