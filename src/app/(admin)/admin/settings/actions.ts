@@ -27,10 +27,10 @@ export type SettingsActionState = {
 const bucket = "menu-images";
 const mutationFailureMessage = "We couldn’t save those settings. Please try again.";
 const cleanupFailureMessage =
-  "Your settings were saved, but an unreferenced logo could not be removed. Please contact support if the issue continues.";
+  "Your settings were saved, but an unreferenced image could not be removed. Please contact support if the issue continues.";
 
-function uploadedFile(formData: FormData): File | null {
-  const value = formData.get("logo");
+function uploadedFile(formData: FormData, field: "logo" | "banner"): File | null {
+  const value = formData.get(field);
   return value instanceof File && value.name !== "" ? value : null;
 }
 
@@ -47,7 +47,7 @@ function imageExtension(mimeType: string): "jpg" | "png" | "webp" | "avif" {
   }
 }
 
-async function uploadLogo(
+async function uploadImage(
   supabase: Awaited<ReturnType<typeof createClient>>,
   file: File,
 ): Promise<{ error?: string; path?: string }> {
@@ -58,19 +58,22 @@ async function uploadLogo(
   });
 
   if (error) {
-    console.error("Failed to upload a CMS restaurant logo.", error);
-    return { error: "We couldn’t upload that logo. Please try again." };
+    console.error("Failed to upload a CMS settings image.", error);
+    return { error: "We couldn’t upload that image. Please try again." };
   }
   return { path };
 }
 
-async function removeNewUploadAfterFailure(
+async function removeNewUploadsAfterFailure(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  path: string,
+  paths: string[],
 ): Promise<boolean> {
-  const { error } = await supabase.storage.from(bucket).remove([path]);
+  if (paths.length === 0) {
+    return true;
+  }
+  const { error } = await supabase.storage.from(bucket).remove(paths);
   if (error) {
-    console.error("Failed to remove a newly uploaded logo after a database error.", error);
+    console.error("Failed to remove newly uploaded images after a database error.", error);
     return false;
   }
   return true;
@@ -81,7 +84,7 @@ async function removeImageIfUnreferenced(
   supabase: Awaited<ReturnType<typeof createClient>>,
   path: string,
 ): Promise<boolean> {
-  const [itemsResult, settingsResult] = await Promise.all([
+  const [itemsResult, logoResult, bannerResult] = await Promise.all([
     supabase
       .from("menu_items")
       .select("id", { count: "exact", head: true })
@@ -90,22 +93,30 @@ async function removeImageIfUnreferenced(
       .from("settings")
       .select("id", { count: "exact", head: true })
       .eq("logo_path", path),
+    supabase
+      .from("settings")
+      .select("id", { count: "exact", head: true })
+      .eq("banner_path", path),
   ]);
 
-  if (itemsResult.error || settingsResult.error) {
+  if (itemsResult.error || logoResult.error || bannerResult.error) {
     console.error(
-      "Failed to verify whether an old restaurant logo is still referenced.",
-      itemsResult.error ?? settingsResult.error,
+      "Failed to verify whether an old CMS settings image is still referenced.",
+      itemsResult.error ?? logoResult.error ?? bannerResult.error,
     );
     return false;
   }
-  if ((itemsResult.count ?? 0) > 0 || (settingsResult.count ?? 0) > 0) {
+  if (
+    (itemsResult.count ?? 0) > 0 ||
+    (logoResult.count ?? 0) > 0 ||
+    (bannerResult.count ?? 0) > 0
+  ) {
     return true;
   }
 
   const { error } = await supabase.storage.from(bucket).remove([path]);
   if (error) {
-    console.error("Failed to remove an unreferenced CMS restaurant logo.", error);
+    console.error("Failed to remove an unreferenced CMS settings image.", error);
     return false;
   }
   return true;
@@ -122,6 +133,7 @@ export async function saveSettings(
     currency: formData.get("currency"),
     defaultLanguage: formData.get("defaultLanguage"),
     primaryColor: formData.get("primaryColor"),
+    removeBanner: formData.get("removeBanner"),
     removeLogo: formData.get("removeLogo"),
     restaurantNameAr: formData.get("restaurantNameAr"),
     restaurantNameEn: formData.get("restaurantNameEn"),
@@ -130,16 +142,21 @@ export async function saveSettings(
     return { fieldErrors: parsedValues.error.flatten().fieldErrors };
   }
 
-  const logo = uploadedFile(formData);
+  const logo = uploadedFile(formData, "logo");
   const logoError = validateMenuImage(logo);
   if (logoError) {
     return { formError: logoError };
+  }
+  const banner = uploadedFile(formData, "banner");
+  const bannerError = validateMenuImage(banner);
+  if (bannerError) {
+    return { formError: bannerError };
   }
 
   const supabase = await createClient();
   const { data: existingSettings, error: readError } = await supabase
     .from("settings")
-    .select("id, logo_path")
+    .select("id, banner_path, logo_path")
     .limit(1)
     .maybeSingle();
   if (readError) {
@@ -153,17 +170,32 @@ export async function saveSettings(
     };
   }
 
-  const upload = logo ? await uploadLogo(supabase, logo) : null;
-  if (upload?.error || (logo && !upload?.path)) {
-    return { formError: upload?.error ?? mutationFailureMessage };
+  const logoUpload = logo ? await uploadImage(supabase, logo) : null;
+  if (logoUpload?.error || (logo && !logoUpload?.path)) {
+    return { formError: logoUpload?.error ?? mutationFailureMessage };
+  }
+  const bannerUpload = banner ? await uploadImage(supabase, banner) : null;
+  if (bannerUpload?.error || (banner && !bannerUpload?.path)) {
+    await removeNewUploadsAfterFailure(
+      supabase,
+      logoUpload?.path ? [logoUpload.path] : [],
+    );
+    return { formError: bannerUpload?.error ?? mutationFailureMessage };
   }
 
+  const newUploadPaths = [logoUpload?.path, bannerUpload?.path].filter(
+    (path): path is string => Boolean(path),
+  );
   const nextLogoPath =
-    upload?.path ??
+    logoUpload?.path ??
     (parsedValues.data.removeLogo ? null : existingSettings.logo_path);
+  const nextBannerPath =
+    bannerUpload?.path ??
+    (parsedValues.data.removeBanner ? null : existingSettings.banner_path);
   const { data: savedSettings, error: updateError } = await supabase
     .from("settings")
     .update({
+      banner_path: nextBannerPath,
       currency: parsedValues.data.currency,
       default_language: parsedValues.data.defaultLanguage,
       logo_path: nextLogoPath,
@@ -176,9 +208,7 @@ export async function saveSettings(
     .maybeSingle();
 
   if (updateError || !savedSettings) {
-    const cleanedUp = upload?.path
-      ? await removeNewUploadAfterFailure(supabase, upload.path)
-      : true;
+    const cleanedUp = await removeNewUploadsAfterFailure(supabase, newUploadPaths);
     if (updateError) {
       console.error("Failed to update CMS restaurant settings.", updateError);
     }
@@ -187,20 +217,28 @@ export async function saveSettings(
         ? updateError
           ? mutationFailureMessage
           : "Restaurant settings changed while you were editing. Refresh and try again."
-        : "We couldn’t save those settings, and the newly uploaded logo could not be removed. Please contact support.",
+        : "We couldn’t save those settings, and a newly uploaded image could not be removed. Please contact support.",
     };
   }
 
   updateTag(PUBLIC_MENU_CACHE_TAG);
   const oldLogoPath = existingSettings.logo_path;
-  const cleanupSucceeded =
+  const oldBannerPath = existingSettings.banner_path;
+  const [logoCleanupSucceeded, bannerCleanupSucceeded] = await Promise.all([
     oldLogoPath && oldLogoPath !== nextLogoPath
-      ? await removeImageIfUnreferenced(supabase, oldLogoPath)
-      : true;
+      ? removeImageIfUnreferenced(supabase, oldLogoPath)
+      : Promise.resolve(true),
+    oldBannerPath && oldBannerPath !== nextBannerPath
+      ? removeImageIfUnreferenced(supabase, oldBannerPath)
+      : Promise.resolve(true),
+  ]);
 
   return {
     status: "success",
     successMessage: "Restaurant settings saved.",
-    warning: cleanupSucceeded ? undefined : cleanupFailureMessage,
+    warning:
+      logoCleanupSucceeded && bannerCleanupSucceeded
+        ? undefined
+        : cleanupFailureMessage,
   };
 }

@@ -26,10 +26,12 @@ type SettingsManagerProps = {
 
 function valuesFor(settings: AdminSettings): SettingsFormValues {
   return {
+    banner: null,
     currency: settings.currency,
     defaultLanguage: settings.defaultLanguage,
     logo: null,
     primaryColor: settings.primaryColor ?? "",
+    removeBanner: false,
     removeLogo: false,
     restaurantNameAr: settings.restaurantNameAr,
     restaurantNameEn: settings.restaurantNameEn,
@@ -43,9 +45,12 @@ function firstError(errors: string[] | undefined): string | undefined {
 export function SettingsManager({ settings }: SettingsManagerProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [bannerPreviewUrl, setBannerPreviewUrl] = useState<string | null>(null);
+  const [bannerFileInputKey, setBannerFileInputKey] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [actionState, setActionState] = useState<SettingsActionState>({});
   const [removeLogo, setRemoveLogo] = useState(false);
+  const [removeBanner, setRemoveBanner] = useState(false);
   const [primaryColorValue, setPrimaryColorValue] = useState(
     settings.primaryColor ?? "",
   );
@@ -71,6 +76,14 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     };
   }, [previewUrl]);
 
+  useEffect(() => {
+    return () => {
+      if (bannerPreviewUrl) {
+        URL.revokeObjectURL(bannerPreviewUrl);
+      }
+    };
+  }, [bannerPreviewUrl]);
+
   function clearSelectedLogo() {
     if (previewUrl) {
       URL.revokeObjectURL(previewUrl);
@@ -90,11 +103,32 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     setValue("logo", file, { shouldValidate: true });
   }
 
+  function clearSelectedBanner() {
+    if (bannerPreviewUrl) {
+      URL.revokeObjectURL(bannerPreviewUrl);
+    }
+    setBannerPreviewUrl(null);
+    setBannerFileInputKey((value) => value + 1);
+    setValue("banner", null, { shouldValidate: true });
+  }
+
+  function selectBanner(file: File | null) {
+    clearSelectedBanner();
+    if (file) {
+      setBannerPreviewUrl(URL.createObjectURL(file));
+      setValue("removeBanner", false);
+      setRemoveBanner(false);
+    }
+    setValue("banner", file, { shouldValidate: true });
+  }
+
   function resetForm() {
     setActionState({});
     clearSelectedLogo();
+    clearSelectedBanner();
     reset(valuesFor(settings));
     setRemoveLogo(false);
+    setRemoveBanner(false);
     setPrimaryColorValue(settings.primaryColor ?? "");
   }
 
@@ -104,10 +138,21 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     setRemoveLogo(true);
   }
 
+  function removeCurrentBanner() {
+    clearSelectedBanner();
+    setValue("removeBanner", true, { shouldDirty: true });
+    setRemoveBanner(true);
+  }
+
   function submitSettings(values: SettingsFormValues) {
     const logoError = validateMenuImage(values.logo);
     if (logoError) {
       setError("logo", { message: logoError });
+      return;
+    }
+    const bannerError = validateMenuImage(values.banner);
+    if (bannerError) {
+      setError("banner", { message: bannerError });
       return;
     }
 
@@ -116,10 +161,14 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     formData.set("defaultLanguage", values.defaultLanguage);
     formData.set("primaryColor", values.primaryColor);
     formData.set("removeLogo", String(values.removeLogo));
+    formData.set("removeBanner", String(values.removeBanner));
     formData.set("restaurantNameAr", values.restaurantNameAr);
     formData.set("restaurantNameEn", values.restaurantNameEn);
     if (values.logo) {
       formData.set("logo", values.logo);
+    }
+    if (values.banner) {
+      formData.set("banner", values.banner);
     }
 
     setActionState({});
@@ -142,6 +191,7 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
       }
       if (outcome.type === "result" && outcome.result.status === "success") {
         clearSelectedLogo();
+        clearSelectedBanner();
       }
       setIsSaving(false);
     });
@@ -156,6 +206,8 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
       | "restaurantNameEn",
   ) => errors[name]?.message ?? firstError(actionState.fieldErrors?.[name]);
   const displayedLogo = previewUrl ?? (removeLogo ? null : settings.logoUrl);
+  const displayedBanner =
+    bannerPreviewUrl ?? (removeBanner ? null : settings.bannerUrl);
   const validPrimaryColor = /^#[0-9A-Fa-f]{6}$/.test(primaryColorValue);
 
   return (
@@ -236,6 +288,37 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
               ) : null}
               {errors.logo?.message ? <p className="text-sm text-destructive">{errors.logo.message}</p> : null}
               {removeLogo ? <p className="text-sm text-muted-foreground">The current logo will be removed when you save.</p> : null}
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset className="border-t pt-6">
+          <legend className="text-base font-semibold">Menu banner</legend>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">JPEG, PNG, WebP, or AVIF up to 5 MiB. Shown at the top of the public menu. Leave unset to show a plain accent color instead.</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">Phones and larger screens crop this photo to different shapes. For the best fit on both, use a wide photo around 2000×900px (roughly 2.2:1) with the main subject centered, kept away from the outer 10% on the left/right and the outer 5% on the top/bottom.</p>
+          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="relative grid aspect-video w-48 shrink-0 place-items-center overflow-hidden rounded-xl border bg-muted">
+              {displayedBanner ? <Image src={displayedBanner} alt="Current menu banner preview" fill sizes="192px" className="object-cover" /> : <ImagePlus className="size-7 text-muted-foreground" aria-hidden="true" />}
+            </div>
+            <div className="min-w-0 space-y-3">
+              <label htmlFor="menu-banner" className="inline-flex min-h-10 cursor-pointer items-center rounded-md border px-3 text-sm font-medium shadow-xs transition-colors hover:bg-accent">
+                {settings.bannerUrl || bannerPreviewUrl ? "Replace banner" : "Choose banner"}
+              </label>
+              <input
+                key={bannerFileInputKey}
+                id="menu-banner"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/avif"
+                className="sr-only"
+                onChange={(event) => selectBanner(event.target.files?.[0] ?? null)}
+              />
+              {(settings.bannerUrl || bannerPreviewUrl) && !removeBanner ? (
+                <Button type="button" variant="ghost" size="sm" onClick={removeCurrentBanner} disabled={isSaving} className="text-destructive hover:bg-destructive/10 hover:text-destructive">
+                  <Trash2 aria-hidden="true" /> Remove banner
+                </Button>
+              ) : null}
+              {errors.banner?.message ? <p className="text-sm text-destructive">{errors.banner.message}</p> : null}
+              {removeBanner ? <p className="text-sm text-muted-foreground">The current banner will be removed when you save.</p> : null}
             </div>
           </div>
         </fieldset>

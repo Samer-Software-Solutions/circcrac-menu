@@ -62,6 +62,7 @@ Table: `public.settings`
 | `restaurant_name_en` | `text` | Required and non-blank |
 | `restaurant_name_ar` | `text` | Required and non-blank |
 | `logo_path` | `text` | Optional; non-blank when present |
+| `banner_path` | `text` | Optional; non-blank when present |
 | `currency` | `text` | Required three-letter uppercase code; defaults to `QAR` |
 | `primary_color` | `text` | Optional `#RRGGBB` color |
 | `default_language` | `text` | Required; `en` or `ar`; defaults to `en` |
@@ -89,8 +90,8 @@ work together as follows:
 
 ## Storage
 
-Supabase Storage uses one public bucket named `menu-images` for food images and
-the restaurant logo.
+Supabase Storage uses one public bucket named `menu-images` for food images,
+the restaurant logo, and the public-menu banner image.
 
 - Public object reads are allowed.
 - Only `authenticated` users can upload, replace, or delete objects.

@@ -94,6 +94,7 @@ export type Database = {
       };
       settings: {
         Row: {
+          banner_path: string | null;
           currency: string;
           default_language: string;
           id: string;
@@ -104,6 +105,7 @@ export type Database = {
           updated_at: string;
         };
         Insert: {
+          banner_path?: string | null;
           currency?: string;
           default_language?: string;
           id?: string;
@@ -114,6 +116,7 @@ export type Database = {
           updated_at?: string;
         };
         Update: {
+          banner_path?: string | null;
           currency?: string;
           default_language?: string;
           id?: string;

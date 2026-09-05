@@ -122,11 +122,6 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
   const menuStyle: MenuBrandStyle = {
     "--menu-brand": settings.primaryColor ?? DEFAULT_MENU_BRAND_COLOR,
   };
-  const heroImages = categories
-    .flatMap((category) => category.items)
-    .map((item) => item.imageUrl)
-    .filter((imageUrl): imageUrl is string => Boolean(imageUrl))
-    .slice(0, 3);
   const heroSubtitle =
     navigationCategories.length > 0
       ? navigationCategories.map((category) => category.label).join(" · ")
@@ -138,8 +133,8 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
       style={menuStyle}
     >
       <MenuHero
+        bannerUrl={settings.bannerUrl}
         currentLocale={locale}
-        heroImages={heroImages}
         languageSwitchLabels={languageSwitchLabels}
         logoAlt={t("logoAlt", { restaurantName })}
         logoUrl={settings.logoUrl}

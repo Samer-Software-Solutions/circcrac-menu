@@ -133,7 +133,7 @@ function SortableItem({
             alt=""
             fill
             sizes="64px"
-            className="object-cover"
+            className="object-fill"
           />
         ) : (
           <ImagePlus
@@ -787,7 +787,7 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
                     fill
                     sizes="(max-width: 640px) 100vw, 384px"
                     unoptimized={displayedPreview.startsWith("blob:")}
-                    className="object-cover"
+                    className="object-fill"
                   />
                 </div>
               ) : null}

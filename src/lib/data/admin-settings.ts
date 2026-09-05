@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/auth/require-admin";
 import { createClient } from "@/lib/supabase/server";
 
 export type AdminSettings = {
+  bannerPath: string | null;
+  bannerUrl: string | null;
   currency: string;
   defaultLanguage: "en" | "ar";
   id: string;
@@ -27,7 +29,7 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
   const { data, error } = await supabase
     .from("settings")
     .select(
-      "currency, default_language, id, logo_path, primary_color, restaurant_name_ar, restaurant_name_en, updated_at",
+      "banner_path, currency, default_language, id, logo_path, primary_color, restaurant_name_ar, restaurant_name_en, updated_at",
     )
     .limit(1)
     .maybeSingle();
@@ -42,6 +44,11 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
 
   return {
     settings: {
+      bannerPath: data.banner_path,
+      bannerUrl: data.banner_path
+        ? supabase.storage.from("menu-images").getPublicUrl(data.banner_path)
+            .data.publicUrl
+        : null,
       currency: data.currency,
       defaultLanguage: data.default_language === "ar" ? "ar" : "en",
       id: data.id,

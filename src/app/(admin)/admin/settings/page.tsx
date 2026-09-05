@@ -23,7 +23,7 @@ export default async function SettingsPage() {
 
   return (
     <SettingsManager
-      key={`${result.settings.updatedAt ?? ""}:${result.settings.logoPath ?? ""}:${result.settings.restaurantNameEn}`}
+      key={`${result.settings.updatedAt ?? ""}:${result.settings.logoPath ?? ""}:${result.settings.bannerPath ?? ""}:${result.settings.restaurantNameEn}`}
       settings={result.settings}
     />
   );

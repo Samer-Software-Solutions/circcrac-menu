@@ -8,6 +8,7 @@ import { createPublicClient } from "@/lib/supabase/public";
 export const PUBLIC_MENU_CACHE_TAG = "public-menu";
 
 type PublicMenuSettings = {
+  bannerUrl: string | null;
   currency: string;
   defaultLanguage: "en" | "ar";
   logoUrl: string | null;
@@ -56,7 +57,7 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
     supabase
       .from("settings")
       .select(
-        "currency, default_language, logo_path, primary_color, restaurant_name_ar, restaurant_name_en",
+        "banner_path, currency, default_language, logo_path, primary_color, restaurant_name_ar, restaurant_name_en",
       )
       .limit(1)
       .maybeSingle(),
@@ -125,6 +126,7 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
 
   return {
     settings: {
+      bannerUrl: publicImageUrl(settingsResult.data.banner_path),
       currency: settingsResult.data.currency,
       defaultLanguage:
         settingsResult.data.default_language === "ar" ? "ar" : "en",

@@ -86,13 +86,19 @@ delivery-related (no ratings, delivery time, cart, or favorite icons).
   top of the page, followed by a rounded card that overlaps the bottom of the
   banner with the logo (or a monogram fallback), the restaurant name, and a
   subtitle built by joining every category name with " · ".
-- **There is no dedicated banner/cover-image field in `settings`.** The banner
-  is synthesized entirely from existing data: a CSS-grid collage of the first
-  up to 3 menu item photos found across categories (in category/item order),
-  or — when zero item photos exist yet — a gradient built from
-  `settings.primaryColor` with a large translucent monogram watermark. This
-  was a deliberate choice to avoid a schema change; see "Known rough edges"
-  below if a curated banner becomes a real requirement.
+- The banner is a single administrator-curated image (`settings.banner_path`,
+  uploaded next to the logo in `/admin/settings`) rendered full-bleed via
+  `object-fit: cover`. When unset, the hero falls back to a gradient built
+  from `settings.primaryColor` with a large translucent monogram watermark.
+- `.menu-hero` sizes itself with a CSS `aspect-ratio` rather than a fixed
+  height so it scales fluidly with viewport width: `16 / 9` by default and
+  `21 / 9` from the `40rem` breakpoint up, capped at `max-height: 24rem` so it
+  never dominates very wide screens. Because the crop ratio differs between
+  phones and larger screens, the same source photo is cropped differently on
+  each — a source image around 2000×900px (~2.2:1) with the subject centered
+  minimizes how much either breakpoint has to crop (see the upload field's
+  helper text in `settings-manager.tsx` for the exact guidance shown to
+  admins).
 - The language switcher floats over the top corner of the banner (mirrors
   sides in RTL) instead of sitting in a plain header row.
 - `src/components/public-menu/category-navigation.tsx` renders a horizontal
@@ -108,15 +114,10 @@ delivery-related (no ratings, delivery time, cart, or favorite icons).
 These are real, observed issues worth addressing before calling this final —
 not hypothetical future work:
 
-- The hero collage/subtitle are derived automatically and not curated by the
-  administrator, so as menu content grows the banner and the
-  category-name subtitle can look arbitrary or truncate awkwardly (the
+- The subtitle (joined category names) is still derived automatically, so as
+  menu content grows it can look arbitrary or truncate awkwardly (the
   subtitle line ellipsizes on narrow screens once there are more than ~4
   categories).
-- If the restaurant later wants deliberate control over the hero image
-  (rather than "whichever 3 item photos happen to be first"), that requires a
-  new `settings` field and migration — read `docs/DATABASE.md` and get explicit
-  product sign-off before adding one; don't add it speculatively.
 - The horizontal tab bar and the quick-jump sheet both list categories but
   don't stay in sync visually — selecting a category from the sheet updates
   the active tab state but does not scroll the tab bar itself so the active

@@ -22,6 +22,7 @@ export const settingsFormSchema = z.object({
   currency: currencySchema,
   defaultLanguage: z.enum(["en", "ar"]),
   primaryColor: primaryColorSchema.nullable(),
+  removeBanner: z.boolean(),
   removeLogo: z.boolean(),
   restaurantNameAr: restaurantNameSchema,
   restaurantNameEn: restaurantNameSchema,
@@ -33,6 +34,7 @@ export const settingsFormDataSchema = settingsFormSchema.extend({
     .trim()
     .transform((value) => (value === "" ? null : value))
     .pipe(primaryColorSchema.nullable()),
+  removeBanner: z.enum(["true", "false"]).transform((value) => value === "true"),
   removeLogo: z.enum(["true", "false"]).transform((value) => value === "true"),
 });
 
@@ -48,9 +50,11 @@ export const settingsClientFormSchema = z.object({
       (value) => value === "" || /^#[0-9A-Fa-f]{6}$/.test(value),
       "Enter a color in the format #RRGGBB.",
     ),
+  removeBanner: z.boolean(),
   removeLogo: z.boolean(),
   restaurantNameAr: restaurantNameSchema,
   restaurantNameEn: restaurantNameSchema,
+  banner: menuImageSchema,
   logo: menuImageSchema,
 });
 

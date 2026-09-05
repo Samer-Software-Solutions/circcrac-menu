@@ -7,8 +7,8 @@ import {
 } from "@/components/language-switch";
 
 type MenuHeroProps = {
+  bannerUrl: string | null;
   currentLocale: Locale;
-  heroImages: string[];
   languageSwitchLabels: LanguageSwitchLabels;
   logoAlt: string;
   logoUrl: string | null;
@@ -18,8 +18,8 @@ type MenuHeroProps = {
 };
 
 export function MenuHero({
+  bannerUrl,
   currentLocale,
-  heroImages,
   languageSwitchLabels,
   logoAlt,
   logoUrl,
@@ -27,28 +27,21 @@ export function MenuHero({
   restaurantName,
   subtitle,
 }: MenuHeroProps) {
-  const collageImages = heroImages.slice(0, 3);
-
   return (
     <div className="menu-hero-wrap">
       <div className="menu-hero">
-        {collageImages.length > 0 ? (
-          <div
-            className={`menu-hero-collage menu-hero-collage-${collageImages.length}`}
-          >
-            {collageImages.map((imageUrl, index) => (
-              <div className="menu-hero-collage-tile" key={imageUrl}>
-                <Image
-                  src={imageUrl}
-                  alt=""
-                  fill
-                  priority={index === 0}
-                  loading={index === 0 ? undefined : "eager"}
-                  sizes="100vw"
-                  className="object-cover"
-                />
-              </div>
-            ))}
+        {bannerUrl ? (
+          <div className="menu-hero-collage">
+            <div className="menu-hero-collage-tile">
+              <Image
+                src={bannerUrl}
+                alt=""
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
+              />
+            </div>
           </div>
         ) : (
           <div className="menu-hero-fallback">
