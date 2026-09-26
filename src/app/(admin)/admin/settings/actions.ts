@@ -14,6 +14,7 @@ export type SettingsActionState = {
   fieldErrors?: {
     currency?: string[];
     defaultLanguage?: string[];
+    googleReviewUrl?: string[];
     primaryColor?: string[];
     restaurantNameAr?: string[];
     restaurantNameEn?: string[];
@@ -134,6 +135,7 @@ export async function saveSettings(
   const parsedValues = settingsFormDataSchema.safeParse({
     currency: formData.get("currency"),
     defaultLanguage: formData.get("defaultLanguage"),
+    googleReviewUrl: formData.get("googleReviewUrl"),
     primaryColor: formData.get("primaryColor"),
     removeBanner: formData.get("removeBanner"),
     removeLogo: formData.get("removeLogo"),
@@ -202,6 +204,7 @@ export async function saveSettings(
       banner_path: nextBannerPath,
       currency: parsedValues.data.currency,
       default_language: parsedValues.data.defaultLanguage,
+      google_review_url: parsedValues.data.googleReviewUrl,
       logo_path: nextLogoPath,
       primary_color: parsedValues.data.primaryColor,
       restaurant_name_ar: parsedValues.data.restaurantNameAr,

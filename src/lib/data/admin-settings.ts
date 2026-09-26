@@ -38,6 +38,7 @@ export type AdminSettings = {
   bannerUrl: string | null;
   currency: string;
   defaultLanguage: "en" | "ar";
+  googleReviewUrl: string | null;
   id: string;
   logoPath: string | null;
   logoUrl: string | null;
@@ -69,7 +70,7 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
   const { data, error } = await supabase
     .from("settings")
     .select(
-      "banner_path, currency, default_language, id, logo_path, primary_color, qr_background_color, qr_corner_dot_type, qr_corner_square_type, qr_dot_color, qr_dot_type, qr_logo_path, qr_logo_size, restaurant_name_ar, restaurant_name_en, tagline_ar, tagline_en, updated_at",
+      "banner_path, currency, default_language, google_review_url, id, logo_path, primary_color, qr_background_color, qr_corner_dot_type, qr_corner_square_type, qr_dot_color, qr_dot_type, qr_logo_path, qr_logo_size, restaurant_name_ar, restaurant_name_en, tagline_ar, tagline_en, updated_at",
     )
     .limit(1)
     .maybeSingle();
@@ -91,6 +92,7 @@ export async function getAdminSettings(): Promise<AdminSettingsResult> {
         : null,
       currency: data.currency,
       defaultLanguage: data.default_language === "ar" ? "ar" : "en",
+      googleReviewUrl: data.google_review_url,
       id: data.id,
       logoPath: data.logo_path,
       logoUrl: data.logo_path

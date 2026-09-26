@@ -68,6 +68,7 @@ Table: `public.settings`
 | `currency` | `text` | Required three-letter uppercase code; defaults to `QAR` |
 | `primary_color` | `text` | Optional `#RRGGBB` color |
 | `default_language` | `text` | Required; `en` or `ar`; defaults to `en` |
+| `google_review_url` | `text` | Optional `https://` URL up to 2048 characters. When set, the public menu shows a floating button linking to the restaurant's Google review page |
 | `qr_dot_color` | `text` | Required `#RRGGBB` color; defaults to `#E0332D`. Color of the QR code's dots |
 | `qr_background_color` | `text` | Required `#RRGGBB` color; defaults to `#242021`. Color behind the QR code's dots |
 | `qr_logo_path` | `text` | Optional; non-blank when present. Logo overlaid on the QR code, independent of `logo_path` |

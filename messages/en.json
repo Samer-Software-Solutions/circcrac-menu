@@ -23,7 +23,9 @@
     "englishLanguageName": "English",
     "arabicLanguageName": "العربية",
     "viewMenuInEnglishLabel": "View the menu in English",
-    "viewMenuInArabicLabel": "View the menu in Arabic"
+    "viewMenuInArabicLabel": "View the menu in Arabic",
+    "googleReviewLabel": "Rate us on Google",
+    "googleReviewAriaLabel": "Rate us on Google (opens in a new tab)"
   },
   "NotFoundPage": {
     "title": "Page not found",

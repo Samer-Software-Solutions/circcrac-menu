@@ -23,9 +23,20 @@ const primaryColorSchema = z
   .regex(/^#[0-9A-Fa-f]{6}$/, "Enter a color in the format #RRGGBB.")
   .transform((value) => value.toUpperCase());
 
+const googleReviewUrlSchema = z
+  .string()
+  .trim()
+  .max(2048, "Use 2048 characters or fewer.")
+  .refine(
+    (value) => value === "" || /^https:\/\/\S+$/.test(value),
+    "Enter a full link starting with https://.",
+  );
+
 export const settingsFormSchema = z.object({
   currency: currencySchema,
   defaultLanguage: z.enum(["en", "ar"]),
+  googleReviewUrl: googleReviewUrlSchema
+    .transform((value) => (value === "" ? null : value)),
   primaryColor: primaryColorSchema.nullable(),
   removeBanner: z.boolean(),
   removeLogo: z.boolean(),
@@ -58,6 +69,7 @@ export const settingsFormDataSchema = settingsFormSchema.extend({
 export const settingsClientFormSchema = z.object({
   currency: currencySchema,
   defaultLanguage: z.enum(["en", "ar"]),
+  googleReviewUrl: googleReviewUrlSchema,
   // Native text inputs use an empty string for an unset value. The server
   // converts that intentionally to null before it reaches PostgreSQL.
   primaryColor: z

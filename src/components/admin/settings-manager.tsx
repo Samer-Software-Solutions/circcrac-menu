@@ -29,6 +29,7 @@ function valuesFor(settings: AdminSettings): SettingsFormValues {
     banner: null,
     currency: settings.currency,
     defaultLanguage: settings.defaultLanguage,
+    googleReviewUrl: settings.googleReviewUrl ?? "",
     logo: null,
     primaryColor: settings.primaryColor ?? "",
     removeBanner: false,
@@ -161,6 +162,7 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     const formData = new FormData();
     formData.set("currency", values.currency);
     formData.set("defaultLanguage", values.defaultLanguage);
+    formData.set("googleReviewUrl", values.googleReviewUrl);
     formData.set("primaryColor", values.primaryColor);
     formData.set("removeLogo", String(values.removeLogo));
     formData.set("removeBanner", String(values.removeBanner));
@@ -205,6 +207,7 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
     name:
       | "currency"
       | "defaultLanguage"
+      | "googleReviewUrl"
       | "primaryColor"
       | "restaurantNameAr"
       | "restaurantNameEn"
@@ -408,6 +411,22 @@ export function SettingsManager({ settings }: SettingsManagerProps) {
               />
             </div>
             {fieldError("primaryColor") ? <p id="primary-color-error" className="text-sm text-destructive">{fieldError("primaryColor")}</p> : <p id="primary-color-help" className="text-xs text-muted-foreground">Leave blank to use the menu’s standard accent color.</p>}
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <label htmlFor="google-review-url" className="text-sm font-medium">Google review link <span className="font-normal text-muted-foreground">(optional)</span></label>
+            <input
+              {...register("googleReviewUrl")}
+              id="google-review-url"
+              type="url"
+              inputMode="url"
+              autoComplete="off"
+              spellCheck={false}
+              aria-describedby={fieldError("googleReviewUrl") ? "google-review-url-error" : "google-review-url-help"}
+              aria-invalid={Boolean(fieldError("googleReviewUrl"))}
+              className="h-10 w-full rounded-lg border bg-background px-3 text-sm shadow-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive"
+              placeholder="https://g.page/r/…/review"
+            />
+            {fieldError("googleReviewUrl") ? <p id="google-review-url-error" className="text-sm text-destructive">{fieldError("googleReviewUrl")}</p> : <p id="google-review-url-help" className="text-xs leading-5 text-muted-foreground">When set, a floating “Rate us on Google” button appears on the public menu. In your Google Business Profile, choose “Ask for reviews” and paste the link here. Leave blank to hide the button.</p>}
           </div>
         </fieldset>
 

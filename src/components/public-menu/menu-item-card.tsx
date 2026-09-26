@@ -33,7 +33,8 @@ export function MenuItemCard({
             fill
             loading={eagerImage ? "eager" : "lazy"}
             sizes="(max-width: 767px) calc(100vw - 40px), (max-width: 1199px) calc(50vw - 52px), 520px"
-            className="object-fill"
+            // we either use object-cover or object-fill depending on opinions
+            className="object-cover"
           />
         </div>
       ) : null}

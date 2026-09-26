@@ -140,8 +140,10 @@ Food images are an important part of the design.
 
 Images should:
 
-- use consistent ratios
-- use `object-fit: cover`
+- use consistent ratios — menu item cards render in a fixed **16:10** frame
+  (`.menu-item-image-frame`); upload landscape photos around **1600×1000px**
+  with the dish centered, since other shapes are center-cropped by `object-fit: cover`
+- use `object-fit: cover` (never `object-fill`, which stretches)
 - avoid distortion
 - load efficiently
 - receive enough visual space to be appetizing

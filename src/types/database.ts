@@ -97,6 +97,7 @@ export type Database = {
           banner_path: string | null;
           currency: string;
           default_language: string;
+          google_review_url: string | null;
           id: string;
           logo_path: string | null;
           primary_color: string | null;
@@ -117,6 +118,7 @@ export type Database = {
           banner_path?: string | null;
           currency?: string;
           default_language?: string;
+          google_review_url?: string | null;
           id?: string;
           logo_path?: string | null;
           primary_color?: string | null;
@@ -137,6 +139,7 @@ export type Database = {
           banner_path?: string | null;
           currency?: string;
           default_language?: string;
+          google_review_url?: string | null;
           id?: string;
           logo_path?: string | null;
           primary_color?: string | null;

@@ -449,6 +449,85 @@ html[lang="ar"] {
     font-weight: 650;
   }
 
+  .menu-review-button {
+    position: fixed;
+    z-index: 40;
+    inset-inline-end: 1rem;
+    bottom: max(1rem, calc(env(safe-area-inset-bottom) + 0.75rem));
+    display: inline-flex;
+    width: 3.5rem;
+    height: 3.5rem;
+    align-items: center;
+    justify-content: center;
+    /* Gold gradient ring: white fill on the padding box, gradient on the
+       border box. */
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background:
+      linear-gradient(white, white) padding-box,
+      linear-gradient(135deg, #f6dc8a 0%, #c8962e 45%, #f2d27c 70%, #a8761f 100%)
+        border-box;
+    box-shadow: 0 12px 32px rgb(28 25 23 / 16%), 0 0 0 1px rgb(200 150 46 / 18%);
+    transition: transform 200ms ease-out;
+  }
+
+  .menu-review-button:active {
+    transform: scale(0.94);
+  }
+
+  .menu-review-button:focus-visible {
+    outline: 2px solid var(--color-stone-800, #292524);
+    outline-offset: 2px;
+  }
+
+  /* Always-visible label beside the button, on its inline-start side so it
+     points toward the page center in LTR and RTL. It nudges gently toward
+     the Google logo to draw attention. */
+  .menu-review-tooltip {
+    --menu-review-nudge: 4px;
+    position: absolute;
+    top: 50%;
+    inset-inline-end: calc(100% + 0.75rem);
+    border-radius: 0.75rem;
+    background: var(--menu-brand);
+    padding: 0.45rem 0.75rem;
+    color: white;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px rgb(28 25 23 / 18%);
+    pointer-events: none;
+    transform: translateY(-50%);
+    animation: menu-review-bob 2.4s ease-in-out infinite;
+  }
+
+  [dir="rtl"] .menu-review-tooltip {
+    --menu-review-nudge: -4px;
+  }
+
+  .menu-review-tooltip::after {
+    position: absolute;
+    top: 50%;
+    inset-inline-start: 100%;
+    width: 0;
+    height: 0;
+    border-block: 6px solid transparent;
+    border-inline-start: 6px solid var(--menu-brand);
+    content: "";
+    transform: translateY(-50%);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu-review-button {
+      transition: none;
+    }
+
+    .menu-review-tooltip {
+      animation: none;
+    }
+  }
+
   .menu-empty-state {
     max-width: 32rem;
     min-height: 45vh;
@@ -467,7 +546,23 @@ html[lang="ar"] .menu-item-card h3 {
   letter-spacing: normal;
 }
 
+@keyframes menu-review-bob {
+  0%,
+  100% {
+    transform: translateY(-50%);
+  }
+
+  50% {
+    transform: translate(var(--menu-review-nudge), -50%);
+  }
+}
+
 @media (min-width: 40rem) {
+  .menu-review-button {
+    inset-inline-end: 1.5rem;
+    bottom: max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem));
+  }
+
   .menu-shell {
     padding-inline: 2rem;
   }

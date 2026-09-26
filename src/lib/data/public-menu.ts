@@ -11,6 +11,7 @@ type PublicMenuSettings = {
   bannerUrl: string | null;
   currency: string;
   defaultLanguage: "en" | "ar";
+  googleReviewUrl: string | null;
   logoUrl: string | null;
   primaryColor: string | null;
   restaurantNameAr: string;
@@ -59,7 +60,7 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
     supabase
       .from("settings")
       .select(
-        "banner_path, currency, default_language, logo_path, primary_color, restaurant_name_ar, restaurant_name_en, tagline_ar, tagline_en",
+        "banner_path, currency, default_language, google_review_url, logo_path, primary_color, restaurant_name_ar, restaurant_name_en, tagline_ar, tagline_en",
       )
       .limit(1)
       .maybeSingle(),
@@ -132,6 +133,7 @@ async function queryPublicMenu(): Promise<PublicMenuData> {
       currency: settingsResult.data.currency,
       defaultLanguage:
         settingsResult.data.default_language === "ar" ? "ar" : "en",
+      googleReviewUrl: settingsResult.data.google_review_url,
       logoUrl: publicImageUrl(settingsResult.data.logo_path),
       primaryColor: settingsResult.data.primary_color,
       restaurantNameAr: settingsResult.data.restaurant_name_ar,

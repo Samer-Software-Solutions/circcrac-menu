@@ -13,6 +13,7 @@ import {
   CategoryNavigation,
   type CategoryNavigationItem,
 } from "@/components/public-menu/category-navigation";
+import { GoogleReviewButton } from "@/components/public-menu/google-review-button";
 import { MenuHero } from "@/components/public-menu/menu-hero";
 import { MenuItemCard } from "@/components/public-menu/menu-item-card";
 import { MenuSkeleton } from "@/components/public-menu/menu-skeleton";
@@ -236,6 +237,14 @@ async function MenuContent({ locale }: { locale: "en" | "ar" }) {
           </div>
         )}
       </div>
+
+      {settings.googleReviewUrl ? (
+        <GoogleReviewButton
+          ariaLabel={t("googleReviewAriaLabel")}
+          href={settings.googleReviewUrl}
+          label={t("googleReviewLabel")}
+        />
+      ) : null}
     </main>
   );
 }

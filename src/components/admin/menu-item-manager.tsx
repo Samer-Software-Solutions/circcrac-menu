@@ -133,7 +133,7 @@ function SortableItem({
             alt=""
             fill
             sizes="64px"
-            className="object-fill"
+            className="object-cover"
           />
         ) : (
           <ImagePlus
@@ -772,7 +772,7 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
                 />
               </div>
               <p id="item-image-help" className="text-xs text-muted-foreground">
-                JPEG, PNG, WebP, or AVIF only. Maximum 5 MiB.
+                JPEG, PNG, WebP, or AVIF only. Maximum 5 MiB. Landscape 16:10 works best (e.g. 1600×1000px); other shapes are center-cropped to fit.
               </p>
               {imageError ? (
                 <p id="item-image-error" className="text-sm text-destructive">
@@ -780,14 +780,14 @@ export function MenuItemManager({ categories, items }: MenuItemManagerProps) {
                 </p>
               ) : null}
               {displayedPreview ? (
-                <div className="relative mt-3 aspect-[4/3] max-w-sm overflow-hidden rounded-xl border bg-muted">
+                <div className="relative mt-3 aspect-[16/10] max-w-sm overflow-hidden rounded-xl border bg-muted">
                   <Image
                     src={displayedPreview}
                     alt="Selected menu item preview"
                     fill
                     sizes="(max-width: 640px) 100vw, 384px"
                     unoptimized={displayedPreview.startsWith("blob:")}
-                    className="object-fill"
+                    className="object-cover"
                   />
                 </div>
               ) : null}
