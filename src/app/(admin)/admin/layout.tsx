@@ -39,7 +39,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
                     height={40}
                     sizes="40px"
                     className="size-full object-cover"
-                    priority
+                    loading="eager"
                   />
                 ) : (
                   <UtensilsCrossed className="size-4" aria-hidden="true" />

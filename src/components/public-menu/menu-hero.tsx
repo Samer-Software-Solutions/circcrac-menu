@@ -37,7 +37,7 @@ export function MenuHero({
                 src={bannerUrl}
                 alt=""
                 fill
-                priority
+                preload
                 sizes="100vw"
                 className="object-cover"
               />
@@ -72,7 +72,7 @@ export function MenuHero({
                 height={72}
                 sizes="72px"
                 className="size-full object-contain"
-                priority
+                loading="eager"
               />
             </div>
           ) : (

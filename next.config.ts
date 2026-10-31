@@ -17,6 +17,9 @@ const nextConfig: NextConfig = {
     },
   },
   images: {
+    // Vercel's Image Optimization quota is exhausted, so <Image> serves the
+    // source files directly. Uploads must already be web-sized.
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: supabaseProtocol,
